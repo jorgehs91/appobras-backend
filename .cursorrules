@@ -1,0 +1,190 @@
+You are the project AI pair-programmer. Follow these rules strictly for all Laravel contributions unless the user overrides them.
+
+1) Contexto e alvo
+- Backend: Laravel 12 em PHP 8.4, MariaDB 12 como banco principal, Redis como cache/queue.
+- Autenticação: Laravel Sanctum (tokens para API e SPA). Autorização: spatie/laravel-permission.
+- Foco: código limpo, testável, documentado, com camadas claras e REST estável.
+
+2) Padrões de código e qualidade
+- Estilo: PSR-12 com Laravel Pint (preset laravel). Sempre incluir docblocks concisos em Services, DTOs, Actions, Jobs, Events e Repositories.
+- Análise estática: PHPStan nível 8 com Larastan. Nenhum erro permitido em CI.
+- Nomeação: inglês no código (classes, métodos, colunas).
+- Convenções:
+  - Controllers finos; sem regra de negócio em Controllers/Models.
+  - Services/Actions encapsulam regras de negócio.
+  - Eloquent first; Repository só se necessário (ex.: múltiplas fontes de dados).
+  - Transações: use DB::transaction para operações atômicas.
+  - Eventos/Listeners para side-effects e integrações.
+  - Jobs para tarefas assíncronas (fila Redis).
+- Commits: Conventional Commits (feat, fix, chore, refactor, test, docs, perf, ci, build).
+- Formatação/QA (local): composer scripts para pint, phpstan, pest, rector.
+
+3) Estrutura de pastas (obrigatória)
+app/
+  Actions/
+  DTOs/
+  Events/
+  Exceptions/
+  Http/
+    Controllers/
+    Middleware/
+    Requests/
+    Resources/
+  Jobs/
+  Models/
+  Policies/
+  Rules/
+  Services/
+bootstrap/
+config/
+database/
+  factories/
+  migrations/
+  seeders/
+routes/
+  api.php
+  web.php
+tests/
+  Feature/
+  Unit/
+
+4) API e contratos
+- Versão: prefixar rotas com /api/v1. Use Route::prefix('api/v1')->group(...).
+- Padrão: REST. Recursos em plural. CRUD padrão. Evitar endpoints “mágicos”.
+- Entrada: validação por Form Requests. Mensagens de erro localizadas.
+- Saída: JsonResource e Resource Collections; paginação com meta e links.
+- Filtros/ordenar: usar query params ?filter[foo]=...&sort=-created_at; validar chaves permitidas.
+- Erros: use RFC 7807-like (type, title, detail, status) ao possível.
+- Segurança: rate limit por usuário/IP; CORS explícito só para domínios confiáveis.
+- Versionamento: mudanças breaking só em nova versão (/api/v2).
+
+5) Segurança
+- Sanctum para autenticação; revogação de tokens e expiração configuradas.
+- Autorização via Policies e spatie/laravel-permission. Nunca confiar apenas no front-end.
+- Mass assignment: sempre $fillable ou guarded=[], mas usar DTOs + ->fill() limitado.
+- Validação estrita nos Form Requests. RegEx e Rules customizadas em app/Rules.
+- Logs sem dados sensíveis. Segredos só por env. Headers de segurança via config.
+- CSRF habilitado em rotas web; CORS para API.
+- Sanitização de input quando necessário (ex.: HTML). Preferir texto simples.
+
+6) Observabilidade e operação
+- Logging: canal stack; níveis coerentes; correlação de request-id (X-Request-Id).
+- Telescope (local e staging) com proteção por gate.
+- Sentry (prod) para exceptions e performance.
+- Métricas: healthcheck simples em /health e DB/Redis checks em /health/deep (somente auth).
+
+7) Performance
+- Cache de consultas pesadas (Redis) com invalidação por tags quando aplicável.
+- Eager loading para evitar N+1; no data layer.
+- Indexes nas migrações para colunas consultadas com frequência.
+- Jobs assíncronos para tarefas lentas. Horizon para gerenciar filas.
+- Config/cache otimizado em prod (config:cache, route:cache, event:cache).
+
+8) Banco de dados e migrações
+- MySQL 8, charset utf8mb4, collation utf8mb4_0900_ai_ci.
+- Naming: snake_case, plural para tabelas; chaves estrangeiras fk_{table}_{column}.
+- Migrations idempotentes; use onDelete('cascade') quando lógico.
+- Factories e Seeders para dados de desenvolvimento e testes.
+- Migrations separadas por domínio quando fizer sentido.
+
+9) Testes
+- Framework: Pest com cobertura mínima 80%.
+- Tipos:
+  - Unit: Services, Rules, DTOs, Policies.
+  - Feature: HTTP endpoints, autorização, serialização.
+  - Integration: Jobs, Events/Listeners, Repositories (se houver).
+- Use factories e DatabaseTransactions/RefreshDatabase conforme necessário.
+- Tests devem ser independentes e rápidos. Nomenclatura clara.
+
+10) Documentação
+- OpenAPI: L5-Swagger (ou outra lib equivalente). Anotar Controllers/Requests/Resources.
+- README: instruções de setup, scripts composer, Docker, credenciais fake.
+- Doc interna: ADRs curtos para decisões arquiteturais relevantes.
+
+11) Ferramentas e dependências
+Composer require (core):
+- laravel/sanctum
+- spatie/laravel-permission
+- laravel/horizon
+- fruitcake/laravel-cors (se necessário)
+- sentry/sentry-laravel (prod)
+Dev:
+- laravel/pint
+- pestphp/pest pestphp/pest-plugin-laravel
+- nunomaduro/larastan
+- barryvdh/laravel-ide-helper (opcional em local)
+- rector/rector (opcional)
+
+12) Ambiente e execução
+- PHP 8.4, ext: pdo_mysql, redis, intl, mbstring, xml, bcmath, gd/imagick (se necessário).
+- Docker (recomendado): nginx, php-fpm, mysql:8, redis:7, horizon worker.
+- .env.example completo, com APP_KEY vazio e placeholders seguros.
+- Timezone: UTC internamente; exibir em locale do usuário. Locale padrão pt_BR.
+- i18n via lang/pt_BR/* com fallback en.
+- Make/composer scripts:
+  - composer qa (pint && phpstan)
+  - composer test (pest)
+  - composer ci (pint --test && phpstan && pest --coverage)
+  - composer ide (ide-helper)
+  - composer types (rector --dry-run)
+
+13) Fluxo esperado para o AI no Cursor
+- Ao gerar código:
+  - Confirmar premissas ausentes com 2-5 perguntas objetivas.
+  - Declarar suposições explícitas no início.
+  - Usar estrutura de pastas definida.
+  - Incluir validações, Policies/Permissions, Resources e testes mínimos.
+  - Fornecer migrações, factories e seeders para exemplos.
+  - Incluir trechos de configuração necessários (providers, middleware, queue, horizon).
+- Ao editar código existente:
+  - Explicar mudança, impacto e riscos.
+  - Sugerir teste mínimo para cobrir o caso.
+  - Garantir compatibilidade com código atual.
+- Saída:
+  - Sempre mostrar caminhos dos arquivos e diffs/snipets prontos para colar.
+  - Manter o código sintético e comentado quando útil.
+
+14) Padrões de API (resumo rápido)
+- HTTP codes: 200/201/204 sucesso, 400 validação, 401 auth, 403 permissão, 404 não encontrado, 409 conflito, 422 validação detalhada, 429 rate limit, 500/503 erros.
+- Paginação: ?page=1&per_page=15; limites validados (1..100).
+- Ordenação: ?sort=field,-created_at; whitelist de campos.
+- Filtros: ?filter[field]=value; sanitizar e validar.
+- Campos: ?fields[resource]=a,b,c (sparse fieldsets).
+- Idempotência: header Idempotency-Key em endpoints sensíveis (ex.: criação com callbacks externos).
+
+15) Segurança adicional
+- Proteção contra enumovering em respostas (ex.: mensagens neutras para 401/403).
+- Uploads: validação de mime/size, armazenamento em storage/app, URLs assinadas quando público.
+- Assinaturas webhooks: validar HMAC e timestamps.
+- Política de senhas e 2FA (quando aplicável).
+
+16) Exemplos de scripts composer (adicione no composer.json)
+"scripts": {
+  "post-autoload-dump": [
+    "@php artisan ide-helper:generate || true",
+    "@php artisan ide-helper:meta || true"
+  ],
+  "pint": "vendor/bin/pint",
+  "phpstan": "vendor/bin/phpstan analyse",
+  "test": "vendor/bin/pest",
+  "qa": [
+    "@pint",
+    "@phpstan"
+  ],
+  "ci": [
+    "vendor/bin/pint --test",
+    "vendor/bin/phpstan",
+    "vendor/bin/pest --coverage"
+  ]
+}
+
+17) Healthchecks e readiness
+- GET /health -> 200 com {"status":"ok"}
+- GET /health/deep -> testa DB e Redis; protegido por auth e permission "system.health"
+
+18) Quando gerar boilerplate
+- Incluir: migrations, models com casts/fillable, FormRequests, Controllers, Resources, Policies, rotas versionadas, testes Pest.
+- Registrar Policies no AuthServiceProvider. Registrar Sanctum e Permission no Kernel/config.
+- Adicionar seeds mínimos para perfis/permissões iniciais.
+
+End of rules.
