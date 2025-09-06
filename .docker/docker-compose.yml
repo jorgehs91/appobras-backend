@@ -1,0 +1,47 @@
+services:
+#  app:
+#    image: serversideup/php:8.4-fpm-nginx
+#    volumes:
+#      - ../backend:/var/www/html
+#    environment:
+#      - PHP_OPCACHE_VALIDATE_TIMESTAMPS=1
+#      - LOG_OUTPUT_LEVEL=debug
+#    depends_on:
+#      - mysql
+#      - redis
+##      - minio
+#    ports:
+#      - "8085:80"
+
+  mariadb:
+    image: mariadb:12
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: appobras
+      MYSQL_USER: app
+      MYSQL_PASSWORD: app
+    ports:
+      - "33069:3306"
+    volumes:
+      - mariadb_data:/var/lib/mysql
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "63799:6379"
+
+#  minio:
+#    image: minio/minio:latest
+#    environment:
+#      - MINIO_ROOT_USER=minio
+#      - MINIO_ROOT_PASSWORD=minio123
+#    command: server /data --console-address ":9001"
+#    ports:
+#      - "9000:9000"
+#      - "9001:9001"
+#    volumes:
+#      - minio_data:/data
+
+volumes:
+  mariadb_data:
+#  minio_data:
