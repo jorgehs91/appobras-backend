@@ -221,6 +221,185 @@
                 }
             }
         },
+        "/api/v1/companies": {
+            "get": {
+                "tags": [
+                    "Companies"
+                ],
+                "summary": "Listar companies do usuário",
+                "operationId": "listCompanies",
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Companies"
+                ],
+                "summary": "Criar company",
+                "operationId": "createCompany",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "required": [
+                                    "name"
+                                ],
+                                "properties": {
+                                    "name": {
+                                        "type": "string"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Created"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/companies/{company}/invites": {
+            "post": {
+                "tags": [
+                    "Companies"
+                ],
+                "summary": "Criar convite",
+                "operationId": "createInvite",
+                "parameters": [
+                    {
+                        "name": "company",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "X-Company-Id",
+                        "in": "header",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "required": [
+                                    "email"
+                                ],
+                                "properties": {
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email"
+                                    },
+                                    "role_name": {
+                                        "type": "string"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Created"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/invites/{token}/accept": {
+            "post": {
+                "tags": [
+                    "Companies"
+                ],
+                "summary": "Aceitar convite",
+                "operationId": "acceptInvite",
+                "parameters": [
+                    {
+                        "name": "token",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/me/switch-company": {
+            "post": {
+                "tags": [
+                    "Me"
+                ],
+                "summary": "Trocar company ativa",
+                "operationId": "switchCompany",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "required": [
+                                    "company_id"
+                                ],
+                                "properties": {
+                                    "company_id": {
+                                        "type": "integer"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
         "/api/v1/admin/roles": {
             "get": {
                 "tags": [
@@ -229,7 +408,14 @@
                 "summary": "Listar papéis",
                 "operationId": "adminListRoles",
                 "parameters": [
-                    {"name": "X-Company-Id", "in": "header", "required": true, "schema": {"type": "integer"}}
+                    {
+                        "name": "X-Company-Id",
+                        "in": "header",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
                 ],
                 "responses": {
                     "200": {
@@ -244,9 +430,15 @@
                                             "items": {
                                                 "type": "object",
                                                 "properties": {
-                                                    "id": {"type": "integer"},
-                                                    "name": {"type": "string"},
-                                                    "guard_name": {"type": "string"}
+                                                    "id": {
+                                                        "type": "integer"
+                                                    },
+                                                    "name": {
+                                                        "type": "string"
+                                                    },
+                                                    "guard_name": {
+                                                        "type": "string"
+                                                    }
                                                 }
                                             }
                                         }
@@ -255,11 +447,17 @@
                             }
                         }
                     },
-                    "401": {"description": "Unauthorized"},
-                    "403": {"description": "Forbidden"}
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    }
                 },
                 "security": [
-                    {"sanctum": []}
+                    {
+                        "sanctum": []
+                    }
                 ]
             }
         },
@@ -271,7 +469,14 @@
                 "summary": "Listar permissões",
                 "operationId": "adminListPermissions",
                 "parameters": [
-                    {"name": "X-Company-Id", "in": "header", "required": true, "schema": {"type": "integer"}}
+                    {
+                        "name": "X-Company-Id",
+                        "in": "header",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
                 ],
                 "responses": {
                     "200": {
@@ -286,9 +491,15 @@
                                             "items": {
                                                 "type": "object",
                                                 "properties": {
-                                                    "id": {"type": "integer"},
-                                                    "name": {"type": "string"},
-                                                    "guard_name": {"type": "string"}
+                                                    "id": {
+                                                        "type": "integer"
+                                                    },
+                                                    "name": {
+                                                        "type": "string"
+                                                    },
+                                                    "guard_name": {
+                                                        "type": "string"
+                                                    }
                                                 }
                                             }
                                         }
@@ -297,11 +508,17 @@
                             }
                         }
                     },
-                    "401": {"description": "Unauthorized"},
-                    "403": {"description": "Forbidden"}
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    }
                 },
                 "security": [
-                    {"sanctum": []}
+                    {
+                        "sanctum": []
+                    }
                 ]
             }
         },
@@ -317,9 +534,18 @@
                         "name": "role",
                         "in": "path",
                         "required": true,
-                        "schema": {"type": "integer"}
+                        "schema": {
+                            "type": "integer"
+                        }
                     },
-                    {"name": "X-Company-Id", "in": "header", "required": true, "schema": {"type": "integer"}}
+                    {
+                        "name": "X-Company-Id",
+                        "in": "header",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
                 ],
                 "requestBody": {
                     "required": true,
@@ -327,9 +553,13 @@
                         "application/json": {
                             "schema": {
                                 "type": "object",
-                                "required": ["user_id"],
+                                "required": [
+                                    "user_id"
+                                ],
                                 "properties": {
-                                    "user_id": {"type": "integer"}
+                                    "user_id": {
+                                        "type": "integer"
+                                    }
                                 }
                             }
                         }
@@ -343,17 +573,25 @@
                                 "schema": {
                                     "type": "object",
                                     "properties": {
-                                        "message": {"type": "string"}
+                                        "message": {
+                                            "type": "string"
+                                        }
                                     }
                                 }
                             }
                         }
                     },
-                    "401": {"description": "Unauthorized"},
-                    "403": {"description": "Forbidden"}
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    }
                 },
                 "security": [
-                    {"sanctum": []}
+                    {
+                        "sanctum": []
+                    }
                 ]
             }
         },
@@ -369,9 +607,18 @@
                         "name": "role",
                         "in": "path",
                         "required": true,
-                        "schema": {"type": "integer"}
+                        "schema": {
+                            "type": "integer"
+                        }
                     },
-                    {"name": "X-Company-Id", "in": "header", "required": true, "schema": {"type": "integer"}}
+                    {
+                        "name": "X-Company-Id",
+                        "in": "header",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
                 ],
                 "requestBody": {
                     "required": true,
@@ -379,9 +626,13 @@
                         "application/json": {
                             "schema": {
                                 "type": "object",
-                                "required": ["user_id"],
+                                "required": [
+                                    "user_id"
+                                ],
                                 "properties": {
-                                    "user_id": {"type": "integer"}
+                                    "user_id": {
+                                        "type": "integer"
+                                    }
                                 }
                             }
                         }
@@ -395,17 +646,25 @@
                                 "schema": {
                                     "type": "object",
                                     "properties": {
-                                        "message": {"type": "string"}
+                                        "message": {
+                                            "type": "string"
+                                        }
                                     }
                                 }
                             }
                         }
                     },
-                    "401": {"description": "Unauthorized"},
-                    "403": {"description": "Forbidden"}
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    }
                 },
                 "security": [
-                    {"sanctum": []}
+                    {
+                        "sanctum": []
+                    }
                 ]
             }
         }

@@ -2,6 +2,9 @@
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\Admin\RoleController;
+use App\Http\Controllers\CompanyController;
+use App\Http\Controllers\InviteController;
+use App\Http\Controllers\MeController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('v1')->group(function (): void {
@@ -17,6 +20,17 @@ Route::prefix('v1')->group(function (): void {
     Route::middleware(['auth:sanctum'])->group(function (): void {
         Route::post('/auth/logout', [AuthController::class, 'logout'])->middleware('throttle:auth');
         Route::post('/auth/refresh', [AuthController::class, 'refresh'])->middleware('throttle:auth');
+
+        // Companies
+        Route::get('/companies', [CompanyController::class, 'index']);
+        Route::post('/companies', [CompanyController::class, 'store']);
+
+        // Invites
+        Route::post('/companies/{company}/invites', [InviteController::class, 'create'])->middleware(['company', 'permission:users.update,sanctum']);
+        Route::post('/invites/{token}/accept', [InviteController::class, 'accept']);
+
+        // Me
+        Route::post('/me/switch-company', [MeController::class, 'switchCompany']);
 
         // Admin-only RBAC management (guard sanctum + contexto de empresa)
         Route::prefix('admin')->middleware(['company'])->group(function (): void {
