@@ -82,7 +82,7 @@ class AuthController extends Controller
     {
         $credentials = $request->only(['email', 'password']);
 
-        if (! Auth::attempt($credentials)) {
+        if (! Auth::guard('web')->attempt($credentials)) {
             // Incrementar tentativa falha se usuário existir
             $user = \App\Models\User::query()->where('email', $request->string('email'))
                 ->first();
@@ -95,7 +95,7 @@ class AuthController extends Controller
         }
 
         /** @var \App\Models\User $user */
-        $user = $request->user();
+        $user = Auth::guard('web')->user();
 
         $user->forceFill([
             'last_login_at' => now(),

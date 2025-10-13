@@ -1,0 +1,48 @@
+<?php
+
+return [
+    'models' => [
+        'permission' => Spatie\Permission\Models\Permission::class,
+        'role' => Spatie\Permission\Models\Role::class,
+    ],
+
+    'table_names' => [
+        'roles' => 'roles',
+        'permissions' => 'permissions',
+        'model_has_permissions' => 'model_has_permissions',
+        'model_has_roles' => 'model_has_roles',
+        'role_has_permissions' => 'role_has_permissions',
+    ],
+
+    'column_names' => [
+        'model_morph_key' => 'model_id',
+        'team_foreign_key' => 'company_id',
+    ],
+
+    'register_permission_check_method' => true,
+
+    'teams' => true,
+
+    'use_setter_mutators' => true,
+
+    'display_permission_in_exception' => false,
+
+    'display_role_in_exception' => false,
+
+    'enable_wildcard_permission' => false,
+
+    'cache' => [
+        // usar o store padrão do cache da app; em produção recomenda-se redis
+        'store' => null,
+
+        'expiration_time' => \DateInterval::createFromDateString('24 hours'),
+
+        'key' => 'spatie.permission.cache',
+
+        'model_key' => 'name',
+
+        'forget_cache_when_permission_is_updated' => true,
+    ],
+];
+
+
