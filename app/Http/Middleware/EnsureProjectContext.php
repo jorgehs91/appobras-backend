@@ -35,6 +35,11 @@ class EnsureProjectContext
             abort(403);
         }
 
+        // Checar membership do usuário no projeto
+        if (! $user->projects()->whereKey($project->id)->exists()) {
+            abort(403);
+        }
+
         // Anexa o projeto resolvido na request para consumo downstream
         $request->attributes->set('project', $project);
 

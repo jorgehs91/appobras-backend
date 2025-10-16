@@ -710,7 +710,7 @@
                 "tags": [
                     "Projects"
                 ],
-                "summary": "Listar projects da company (opcional filtrar por X-Project-Id)",
+                "summary": "Listar projects da company onde sou membro (opcional filtrar por X-Project-Id)",
                 "operationId": "listProjects",
                 "parameters": [
                     {
@@ -772,6 +772,38 @@
                                     },
                                     "description": {
                                         "type": "string"
+                                    },
+                                    "status": {
+                                        "type": "string",
+                                        "enum": ["planned", "in_progress", "paused", "completed", "cancelled"]
+                                    },
+                                    "archived_at": {
+                                        "type": "string",
+                                        "format": "date"
+                                    },
+                                    "start_date": {
+                                        "type": "string",
+                                        "format": "date"
+                                    },
+                                    "end_date": {
+                                        "type": "string",
+                                        "format": "date"
+                                    },
+                                    "actual_start_date": {
+                                        "type": "string",
+                                        "format": "date"
+                                    },
+                                    "actual_end_date": {
+                                        "type": "string",
+                                        "format": "date"
+                                    },
+                                    "planned_budget_amount": {
+                                        "type": "number",
+                                        "format": "decimal"
+                                    },
+                                    
+                                    "address": {
+                                        "type": "string"
                                     }
                                 }
                             }
@@ -788,6 +820,104 @@
                         "sanctum": []
                     }
                 ]
+            }
+        },
+        "/api/v1/projects/{project}": {
+            "put": {
+                "tags": [
+                    "Projects"
+                ],
+                "summary": "Atualizar project",
+                "operationId": "updateProject",
+                "parameters": [
+                    {
+                        "name": "project",
+                        "in": "path",
+                        "required": true,
+                        "schema": { "type": "integer" }
+                    },
+                    {
+                        "name": "X-Company-Id",
+                        "in": "header",
+                        "required": true,
+                        "schema": { "type": "integer" }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "name": { "type": "string" },
+                                    "description": { "type": "string" },
+                                    "status": { "type": "string", "enum": ["planned", "in_progress", "paused", "completed", "cancelled"] },
+                                    "archived_at": { "type": "string", "format": "date" },
+                                    "start_date": { "type": "string", "format": "date" },
+                                    "end_date": { "type": "string", "format": "date" },
+                                    "actual_start_date": { "type": "string", "format": "date" },
+                                    "actual_end_date": { "type": "string", "format": "date" },
+                                    "planned_budget_amount": { "type": "number", "format": "decimal" },
+                                    "manager_user_id": { "type": "integer" },
+                                    "address": { "type": "string" }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": { "description": "OK" }
+                },
+                "security": [ { "sanctum": [] } ]
+            },
+            "patch": {
+                "tags": [
+                    "Projects"
+                ],
+                "summary": "Atualizar project (parcial)",
+                "operationId": "patchProject",
+                "parameters": [
+                    {
+                        "name": "project",
+                        "in": "path",
+                        "required": true,
+                        "schema": { "type": "integer" }
+                    },
+                    {
+                        "name": "X-Company-Id",
+                        "in": "header",
+                        "required": true,
+                        "schema": { "type": "integer" }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "name": { "type": "string" },
+                                    "description": { "type": "string" },
+                                    "status": { "type": "string", "enum": ["planned", "in_progress", "paused", "completed", "cancelled"] },
+                                    "archived_at": { "type": "string", "format": "date" },
+                                    "start_date": { "type": "string", "format": "date" },
+                                    "end_date": { "type": "string", "format": "date" },
+                                    "actual_start_date": { "type": "string", "format": "date" },
+                                    "actual_end_date": { "type": "string", "format": "date" },
+                                    "planned_budget_amount": { "type": "number", "format": "decimal" },
+                                    "manager_user_id": { "type": "integer" },
+                                    "address": { "type": "string" }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": { "description": "OK" }
+                },
+                "security": [ { "sanctum": [] } ]
             }
         }
     },

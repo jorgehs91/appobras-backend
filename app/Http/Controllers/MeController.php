@@ -42,6 +42,9 @@ class MeController extends Controller
             ->where('company_id', $companyId)
             ->firstOrFail();
 
+        // Requer que o usuário seja membro do projeto
+        abort_unless($user->projects()->whereKey($project->id)->exists(), 403);
+
         $user->current_project_id = (int) $project->id;
         $user->save();
 

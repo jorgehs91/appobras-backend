@@ -22,17 +22,25 @@ class ProjectsTest extends TestCase
 
         $p1 = Project::query()->create(['company_id' => $company->id, 'name' => 'P1']);
         $p2 = Project::query()->create(['company_id' => $company->id, 'name' => 'P2']);
+        // usuário é membro apenas de P1
+        $user->projects()->attach($p1->id, ['role' => 'Viewer']);
 
-        // Sem X-Project-Id -> retorna todos da company
+        // Sem X-Project-Id -> retorna apenas os projetos onde o usuário é membro
         $this->getJson('/api/v1/projects', ['X-Company-Id' => $company->id])
             ->assertOk()
-            ->assertJsonCount(2, 'data');
+            ->assertJsonCount(1, 'data')
+            ->assertJsonPath('data.0.id', $p1->id);
 
-        // Com X-Project-Id -> filtra
+        // Com X-Project-Id -> filtra e respeita membership
         $this->getJson('/api/v1/projects', ['X-Company-Id' => $company->id, 'X-Project-Id' => $p1->id])
             ->assertOk()
             ->assertJsonCount(1, 'data')
             ->assertJsonPath('data.0.id', $p1->id);
+
+        // Com X-Project-Id de um projeto que não é membro -> vazio
+        $this->getJson('/api/v1/projects', ['X-Company-Id' => $company->id, 'X-Project-Id' => $p2->id])
+            ->assertOk()
+            ->assertJsonCount(0, 'data');
     }
 
     public function test_criar_project(): void
@@ -54,6 +62,15 @@ class ProjectsTest extends TestCase
             'company_id' => $company->id,
             'name' => 'Meu Projeto',
         ]);
+
+        $project = Project::query()->where('company_id', $company->id)->where('name', 'Meu Projeto')->first();
+        $this->assertNotNull($project);
+        $this->assertEquals($user->id, $project->manager_user_id);
+
+        // membership do criador como Manager
+        $this->assertTrue($user->projects()->whereKey($project->id)->exists());
+        $pivot = $user->projects()->whereKey($project->id)->first()->pivot;
+        $this->assertEquals('Manager', $pivot->role);
     }
 
     public function test_bloqueia_acesso_sem_company_context(): void
@@ -75,6 +92,9 @@ class ProjectsTest extends TestCase
         $p1 = Project::query()->create(['company_id' => $company->id, 'name' => 'P1']);
         $p2 = Project::query()->create(['company_id' => $company->id, 'name' => 'P2']);
 
+        // torna-se membro do projeto alvo
+        $user->projects()->attach($p2->id, ['role' => 'Viewer']);
+
         $this->postJson('/api/v1/me/switch-project', [
             'project_id' => $p2->id,
         ], ['X-Company-Id' => $company->id])
@@ -82,6 +102,49 @@ class ProjectsTest extends TestCase
 
         $user->refresh();
         $this->assertEquals($p2->id, $user->current_project_id);
+    }
+
+    public function test_switch_project_bloqueia_quando_nao_membro(): void
+    {
+        $user = User::factory()->create();
+        $company = Company::query()->create(['name' => 'C1']);
+        $user->companies()->attach($company->id);
+        Sanctum::actingAs($user);
+
+        $p = Project::query()->create(['company_id' => $company->id, 'name' => 'P1']);
+
+        // sem membership
+        $this->postJson('/api/v1/me/switch-project', [
+            'project_id' => $p->id,
+        ], ['X-Company-Id' => $company->id])
+            ->assertStatus(403);
+    }
+
+    public function test_update_para_completed_define_actual_end_date_quando_vazio(): void
+    {
+        $user = User::factory()->create();
+        $company = Company::query()->create(['name' => 'C1']);
+        $user->companies()->attach($company->id);
+        Sanctum::actingAs($user);
+
+        $p = Project::query()->create([
+            'company_id' => $company->id,
+            'name' => 'P1',
+            'status' => 'in_progress',
+            'start_date' => now()->subDays(10)->toDateString(),
+            'end_date' => now()->addDays(10)->toDateString(),
+        ]);
+        // membership
+        $user->projects()->attach($p->id, ['role' => 'Viewer']);
+
+        $this->patchJson('/api/v1/projects/'.$p->id, [
+            'status' => 'completed',
+        ], ['X-Company-Id' => $company->id])
+            ->assertOk();
+
+        $p->refresh();
+        $this->assertEquals('completed', $p->status);
+        $this->assertNotNull($p->actual_end_date);
     }
 }
 

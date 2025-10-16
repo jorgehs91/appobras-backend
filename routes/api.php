@@ -46,6 +46,7 @@ Route::prefix('v1')->group(function (): void {
         Route::middleware(['company'])->group(function (): void {
             Route::get('/projects', [ProjectController::class, 'index']);
             Route::post('/projects', [ProjectController::class, 'store']);
+            Route::match(['put', 'patch'], '/projects/{project}', [ProjectController::class, 'update']);
         });
     });
 });

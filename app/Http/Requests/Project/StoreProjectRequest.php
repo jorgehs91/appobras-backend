@@ -29,6 +29,14 @@ class StoreProjectRequest extends FormRequest
                 'unique:projects,name,NULL,id,company_id,'.$companyId,
             ],
             'description' => ['nullable', 'string', 'max:2000'],
+            'status' => ['nullable', 'string', 'in:planned,in_progress,paused,completed,cancelled'],
+            'archived_at' => ['nullable', 'date'],
+            'start_date' => ['nullable', 'date'],
+            'end_date' => ['nullable', 'date', 'after_or_equal:start_date'],
+            'actual_start_date' => ['nullable', 'date'],
+            'actual_end_date' => ['nullable', 'date', 'after_or_equal:actual_start_date'],
+            'planned_budget_amount' => ['nullable', 'numeric', 'min:0'],
+            'address' => ['nullable', 'string', 'max:255'],
         ];
     }
 }
