@@ -24,6 +24,29 @@ class MeController extends Controller
 
         return response()->json(['message' => 'Company switched'], 200);
     }
+
+    public function switchProject(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'project_id' => ['required', 'integer', 'exists:projects,id'],
+        ]);
+
+        /** @var \App\Models\User $user */
+        $user = $request->user();
+        $companyId = (int) $request->header('X-Company-Id');
+
+        abort_unless($companyId && $user->companies()->whereKey($companyId)->exists(), 403);
+
+        $project = \App\Models\Project::query()
+            ->whereKey($validated['project_id'])
+            ->where('company_id', $companyId)
+            ->firstOrFail();
+
+        $user->current_project_id = (int) $project->id;
+        $user->save();
+
+        return response()->json(['message' => 'Project switched'], 200);
+    }
 }
 
 

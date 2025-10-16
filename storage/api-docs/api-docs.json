@@ -400,6 +400,42 @@
                 ]
             }
         },
+        "/api/v1/me/switch-project": {
+            "post": {
+                "tags": [
+                    "Me"
+                ],
+                "summary": "Trocar project selecionado",
+                "operationId": "switchProject",
+                "parameters": [
+                    {
+                        "name": "X-Company-Id",
+                        "in": "header",
+                        "required": true,
+                        "schema": { "type": "integer" }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "required": ["project_id"],
+                                "properties": {
+                                    "project_id": { "type": "integer" }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": { "description": "OK" },
+                    "403": { "description": "Forbidden" }
+                },
+                "security": [ { "sanctum": [] } ]
+            }
+        },
         "/api/v1/admin/roles": {
             "get": {
                 "tags": [
@@ -668,6 +704,92 @@
                 ]
             }
         }
+        ,
+        "/api/v1/projects": {
+            "get": {
+                "tags": [
+                    "Projects"
+                ],
+                "summary": "Listar projects da company (opcional filtrar por X-Project-Id)",
+                "operationId": "listProjects",
+                "parameters": [
+                    {
+                        "name": "X-Company-Id",
+                        "in": "header",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "X-Project-Id",
+                        "in": "header",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Projects"
+                ],
+                "summary": "Criar project",
+                "operationId": "createProject",
+                "parameters": [
+                    {
+                        "name": "X-Company-Id",
+                        "in": "header",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "required": [
+                                    "name"
+                                ],
+                                "properties": {
+                                    "name": {
+                                        "type": "string"
+                                    },
+                                    "description": {
+                                        "type": "string"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Created"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        }
     },
     "components": {
         "securitySchemes": {
@@ -686,6 +808,10 @@
         {
             "name": "Admin",
             "description": "Admin RBAC"
+        },
+        {
+            "name": "Projects",
+            "description": "Projects"
         }
     ]
 }

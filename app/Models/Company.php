@@ -15,6 +15,11 @@ class Company extends Model
     {
         return $this->belongsToMany(User::class, 'company_user')->withTimestamps();
     }
+
+    public function projects()
+    {
+        return $this->hasMany(Project::class);
+    }
 }
 
 
