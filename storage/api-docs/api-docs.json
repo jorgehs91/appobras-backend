@@ -7,7 +7,7 @@
     },
     "servers": [
         {
-            "url": "",
+            "url": "/api",
             "description": "API base"
         }
     ],
@@ -226,11 +226,41 @@
                 "tags": [
                     "Companies"
                 ],
-                "summary": "Listar companies do usuário",
-                "operationId": "listCompanies",
+                "summary": "Listar empresas do usuário",
+                "description": "Retorna todas as empresas que o usuário autenticado pertence",
+                "operationId": "44926c230232e0ab0f8674f0e7d1ef0c",
                 "responses": {
                     "200": {
-                        "description": "OK"
+                        "description": "Lista de empresas",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "name": {
+                                                        "type": "string",
+                                                        "example": "Construtora ABC"
+                                                    },
+                                                    "created_at": {
+                                                        "type": "string",
+                                                        "format": "date-time"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
                     }
                 },
                 "security": [
@@ -243,29 +273,62 @@
                 "tags": [
                     "Companies"
                 ],
-                "summary": "Criar company",
-                "operationId": "createCompany",
+                "summary": "Criar empresa",
+                "description": "Cria uma nova empresa e atribui o usuário como Admin",
+                "operationId": "452e31b1f5c474b63614ab2a7138e467",
                 "requestBody": {
                     "required": true,
                     "content": {
                         "application/json": {
                             "schema": {
-                                "type": "object",
                                 "required": [
                                     "name"
                                 ],
                                 "properties": {
                                     "name": {
-                                        "type": "string"
+                                        "type": "string",
+                                        "maxLength": 255,
+                                        "minLength": 2,
+                                        "example": "Minha Construtora"
                                     }
-                                }
+                                },
+                                "type": "object"
                             }
                         }
                     }
                 },
                 "responses": {
                     "201": {
-                        "description": "Created"
+                        "description": "Empresa criada com sucesso",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "name": {
+                                                    "type": "string",
+                                                    "example": "Minha Construtora"
+                                                },
+                                                "created_at": {
+                                                    "type": "string",
+                                                    "format": "date-time"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Erro de validação"
                     }
                 },
                 "security": [
@@ -275,22 +338,76 @@
                 ]
             }
         },
-        "/api/v1/companies/{company}/invites": {
-            "post": {
+        "/api/v1/contractors": {
+            "get": {
                 "tags": [
-                    "Companies"
+                    "Contractors"
                 ],
-                "summary": "Criar convite",
-                "operationId": "createInvite",
+                "summary": "Listar empreiteiros",
+                "description": "Retorna lista de empreiteiros da empresa",
+                "operationId": "fc05a178905474e3e652ea3dd5114c46",
                 "parameters": [
                     {
-                        "name": "company",
-                        "in": "path",
+                        "name": "X-Company-Id",
+                        "in": "header",
                         "required": true,
                         "schema": {
                             "type": "integer"
                         }
-                    },
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Lista de empreiteiros",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "name": {
+                                                        "type": "string",
+                                                        "example": "Construtora ABC"
+                                                    },
+                                                    "contact": {
+                                                        "type": "string",
+                                                        "example": "(11) 98765-4321"
+                                                    },
+                                                    "specialties": {
+                                                        "type": "string",
+                                                        "example": "Fundação, Estrutura"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Contractors"
+                ],
+                "summary": "Criar empreiteiro",
+                "description": "Cria um novo empreiteiro na empresa",
+                "operationId": "5723ef720f05f0744659b666f05b91cc",
+                "parameters": [
                     {
                         "name": "X-Company-Id",
                         "in": "header",
@@ -305,26 +422,64 @@
                     "content": {
                         "application/json": {
                             "schema": {
-                                "type": "object",
                                 "required": [
-                                    "email"
+                                    "name"
                                 ],
                                 "properties": {
-                                    "email": {
+                                    "name": {
                                         "type": "string",
-                                        "format": "email"
+                                        "example": "Construtora ABC"
                                     },
-                                    "role_name": {
-                                        "type": "string"
+                                    "contact": {
+                                        "type": "string",
+                                        "example": "(11) 98765-4321"
+                                    },
+                                    "specialties": {
+                                        "type": "string",
+                                        "example": "Fundação, Estrutura"
                                     }
-                                }
+                                },
+                                "type": "object"
                             }
                         }
                     }
                 },
                 "responses": {
                     "201": {
-                        "description": "Created"
+                        "description": "Empreiteiro criado com sucesso",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "name": {
+                                                    "type": "string",
+                                                    "example": "Construtora ABC"
+                                                },
+                                                "contact": {
+                                                    "type": "string",
+                                                    "example": "(11) 98765-4321"
+                                                },
+                                                "specialties": {
+                                                    "type": "string",
+                                                    "example": "Fundação, Estrutura"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Erro de validação"
                     }
                 },
                 "security": [
@@ -334,26 +489,92 @@
                 ]
             }
         },
-        "/api/v1/invites/{token}/accept": {
-            "post": {
+        "/api/v1/dashboard/stats": {
+            "get": {
                 "tags": [
-                    "Companies"
+                    "Progress"
                 ],
-                "summary": "Aceitar convite",
-                "operationId": "acceptInvite",
+                "summary": "Estatísticas do dashboard",
+                "description": "Retorna estatísticas agregadas dos projetos",
+                "operationId": "cafa93e57a14923cee17d59cd18bca1d",
                 "parameters": [
                     {
-                        "name": "token",
-                        "in": "path",
+                        "name": "X-Company-Id",
+                        "in": "header",
                         "required": true,
                         "schema": {
-                            "type": "string"
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "project_id",
+                        "in": "query",
+                        "schema": {
+                            "type": "integer"
                         }
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "OK"
+                        "description": "Estatísticas",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "avg_progress": {
+                                            "type": "integer"
+                                        },
+                                        "overdue_tasks_count": {
+                                            "type": "integer"
+                                        },
+                                        "upcoming_deliveries_count": {
+                                            "type": "integer"
+                                        },
+                                        "total_budget": {
+                                            "type": "number"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/projects/{project}/documents": {
+            "get": {
+                "tags": [
+                    "Documents"
+                ],
+                "summary": "Listar documentos do projeto",
+                "operationId": "00487875969f23166bb69a221191437b",
+                "parameters": [
+                    {
+                        "name": "X-Company-Id",
+                        "in": "header",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "project",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Lista de documentos"
                     }
                 },
                 "security": [
@@ -368,29 +589,50 @@
                 "tags": [
                     "Me"
                 ],
-                "summary": "Trocar company ativa",
-                "operationId": "switchCompany",
+                "summary": "Trocar empresa ativa",
+                "description": "Altera a empresa ativa do usuário autenticado",
+                "operationId": "258cb181da859637cadf5eaec5a2be3f",
                 "requestBody": {
                     "required": true,
                     "content": {
                         "application/json": {
                             "schema": {
-                                "type": "object",
                                 "required": [
                                     "company_id"
                                 ],
                                 "properties": {
                                     "company_id": {
-                                        "type": "integer"
+                                        "type": "integer",
+                                        "example": 1
                                     }
-                                }
+                                },
+                                "type": "object"
                             }
                         }
                     }
                 },
                 "responses": {
                     "200": {
-                        "description": "OK"
+                        "description": "Empresa trocada com sucesso",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Company switched"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Usuário não pertence à empresa"
+                    },
+                    "422": {
+                        "description": "Erro de validação"
                     }
                 },
                 "security": [
@@ -405,14 +647,17 @@
                 "tags": [
                     "Me"
                 ],
-                "summary": "Trocar project selecionado",
-                "operationId": "switchProject",
+                "summary": "Trocar projeto ativo",
+                "description": "Altera o projeto ativo do usuário autenticado dentro da empresa atual",
+                "operationId": "bc2be8c31b63851fabf4d4cbb9a67d31",
                 "parameters": [
                     {
                         "name": "X-Company-Id",
                         "in": "header",
                         "required": true,
-                        "schema": { "type": "integer" }
+                        "schema": {
+                            "type": "integer"
+                        }
                     }
                 ],
                 "requestBody": {
@@ -420,74 +665,45 @@
                     "content": {
                         "application/json": {
                             "schema": {
-                                "type": "object",
-                                "required": ["project_id"],
+                                "required": [
+                                    "project_id"
+                                ],
                                 "properties": {
-                                    "project_id": { "type": "integer" }
-                                }
+                                    "project_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    }
+                                },
+                                "type": "object"
                             }
                         }
                     }
                 },
                 "responses": {
-                    "200": { "description": "OK" },
-                    "403": { "description": "Forbidden" }
-                },
-                "security": [ { "sanctum": [] } ]
-            }
-        },
-        "/api/v1/admin/roles": {
-            "get": {
-                "tags": [
-                    "Admin"
-                ],
-                "summary": "Listar papéis",
-                "operationId": "adminListRoles",
-                "parameters": [
-                    {
-                        "name": "X-Company-Id",
-                        "in": "header",
-                        "required": true,
-                        "schema": {
-                            "type": "integer"
-                        }
-                    }
-                ],
-                "responses": {
                     "200": {
-                        "description": "OK",
+                        "description": "Projeto trocado com sucesso",
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "type": "object",
                                     "properties": {
-                                        "data": {
-                                            "type": "array",
-                                            "items": {
-                                                "type": "object",
-                                                "properties": {
-                                                    "id": {
-                                                        "type": "integer"
-                                                    },
-                                                    "name": {
-                                                        "type": "string"
-                                                    },
-                                                    "guard_name": {
-                                                        "type": "string"
-                                                    }
-                                                }
-                                            }
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Project switched"
                                         }
-                                    }
+                                    },
+                                    "type": "object"
                                 }
                             }
                         }
                     },
-                    "401": {
-                        "description": "Unauthorized"
-                    },
                     "403": {
-                        "description": "Forbidden"
+                        "description": "Usuário não é membro do projeto"
+                    },
+                    "404": {
+                        "description": "Projeto não encontrado"
+                    },
+                    "422": {
+                        "description": "Erro de validação"
                     }
                 },
                 "security": [
@@ -497,13 +713,14 @@
                 ]
             }
         },
-        "/api/v1/admin/permissions": {
+        "/api/v1/projects/{project}/phases": {
             "get": {
                 "tags": [
-                    "Admin"
+                    "Phases"
                 ],
-                "summary": "Listar permissões",
-                "operationId": "adminListPermissions",
+                "summary": "Listar fases do projeto",
+                "description": "Retorna todas as fases de um projeto com progresso calculado",
+                "operationId": "d7a760c08e07f540d5304de0d9fb0c8d",
                 "parameters": [
                     {
                         "name": "X-Company-Id",
@@ -512,62 +729,9 @@
                         "schema": {
                             "type": "integer"
                         }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "array",
-                                            "items": {
-                                                "type": "object",
-                                                "properties": {
-                                                    "id": {
-                                                        "type": "integer"
-                                                    },
-                                                    "name": {
-                                                        "type": "string"
-                                                    },
-                                                    "guard_name": {
-                                                        "type": "string"
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
                     },
-                    "401": {
-                        "description": "Unauthorized"
-                    },
-                    "403": {
-                        "description": "Forbidden"
-                    }
-                },
-                "security": [
                     {
-                        "sanctum": []
-                    }
-                ]
-            }
-        },
-        "/api/v1/admin/roles/{role}/assign": {
-            "post": {
-                "tags": [
-                    "Admin"
-                ],
-                "summary": "Atribuir papel a usuário",
-                "operationId": "adminAssignRole",
-                "parameters": [
-                    {
-                        "name": "role",
+                        "name": "project",
                         "in": "path",
                         "required": true,
                         "schema": {
@@ -575,53 +739,22 @@
                         }
                     },
                     {
-                        "name": "X-Company-Id",
-                        "in": "header",
-                        "required": true,
+                        "name": "status",
+                        "in": "query",
+                        "required": false,
                         "schema": {
-                            "type": "integer"
+                            "type": "string",
+                            "enum": [
+                                "draft",
+                                "active",
+                                "archived"
+                            ]
                         }
                     }
                 ],
-                "requestBody": {
-                    "required": true,
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "type": "object",
-                                "required": [
-                                    "user_id"
-                                ],
-                                "properties": {
-                                    "user_id": {
-                                        "type": "integer"
-                                    }
-                                }
-                            }
-                        }
-                    }
-                },
                 "responses": {
                     "200": {
-                        "description": "OK",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "type": "object",
-                                    "properties": {
-                                        "message": {
-                                            "type": "string"
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized"
-                    },
-                    "403": {
-                        "description": "Forbidden"
+                        "description": "Lista de fases com progresso"
                     }
                 },
                 "security": [
@@ -631,87 +764,14 @@
                 ]
             }
         },
-        "/api/v1/admin/roles/{role}/revoke": {
-            "post": {
-                "tags": [
-                    "Admin"
-                ],
-                "summary": "Revogar papel de usuário",
-                "operationId": "adminRevokeRole",
-                "parameters": [
-                    {
-                        "name": "role",
-                        "in": "path",
-                        "required": true,
-                        "schema": {
-                            "type": "integer"
-                        }
-                    },
-                    {
-                        "name": "X-Company-Id",
-                        "in": "header",
-                        "required": true,
-                        "schema": {
-                            "type": "integer"
-                        }
-                    }
-                ],
-                "requestBody": {
-                    "required": true,
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "type": "object",
-                                "required": [
-                                    "user_id"
-                                ],
-                                "properties": {
-                                    "user_id": {
-                                        "type": "integer"
-                                    }
-                                }
-                            }
-                        }
-                    }
-                },
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "type": "object",
-                                    "properties": {
-                                        "message": {
-                                            "type": "string"
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized"
-                    },
-                    "403": {
-                        "description": "Forbidden"
-                    }
-                },
-                "security": [
-                    {
-                        "sanctum": []
-                    }
-                ]
-            }
-        }
-        ,
         "/api/v1/projects": {
             "get": {
                 "tags": [
                     "Projects"
                 ],
-                "summary": "Listar projects da company onde sou membro (opcional filtrar por X-Project-Id)",
-                "operationId": "listProjects",
+                "summary": "Listar projetos",
+                "description": "Retorna os projetos da empresa que o usuário tem acesso",
+                "operationId": "4581dcc89729ced0a5c29d8132aaaee0",
                 "parameters": [
                     {
                         "name": "X-Company-Id",
@@ -724,6 +784,7 @@
                     {
                         "name": "X-Project-Id",
                         "in": "header",
+                        "description": "Filtrar por projeto específico",
                         "required": false,
                         "schema": {
                             "type": "integer"
@@ -732,7 +793,53 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "OK"
+                        "description": "Lista de projetos",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer"
+                                                    },
+                                                    "name": {
+                                                        "type": "string"
+                                                    },
+                                                    "description": {
+                                                        "type": "string"
+                                                    },
+                                                    "status": {
+                                                        "type": "string"
+                                                    },
+                                                    "address": {
+                                                        "type": "string"
+                                                    },
+                                                    "start_date": {
+                                                        "type": "string",
+                                                        "format": "date"
+                                                    },
+                                                    "end_date": {
+                                                        "type": "string",
+                                                        "format": "date"
+                                                    },
+                                                    "planned_budget_amount": {
+                                                        "type": "number"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Usuário não pertence à empresa"
                     }
                 },
                 "security": [
@@ -745,8 +852,9 @@
                 "tags": [
                     "Projects"
                 ],
-                "summary": "Criar project",
-                "operationId": "createProject",
+                "summary": "Criar projeto",
+                "description": "Cria um novo projeto/obra na empresa e atribui o criador como Manager",
+                "operationId": "7afee26aa9047c66217855bd05d3db0b",
                 "parameters": [
                     {
                         "name": "X-Company-Id",
@@ -762,24 +870,20 @@
                     "content": {
                         "application/json": {
                             "schema": {
-                                "type": "object",
                                 "required": [
                                     "name"
                                 ],
                                 "properties": {
                                     "name": {
-                                        "type": "string"
+                                        "type": "string",
+                                        "example": "Edifício Residencial ABC"
                                     },
                                     "description": {
                                         "type": "string"
                                     },
-                                    "status": {
+                                    "address": {
                                         "type": "string",
-                                        "enum": ["planned", "in_progress", "paused", "completed", "cancelled"]
-                                    },
-                                    "archived_at": {
-                                        "type": "string",
-                                        "format": "date"
+                                        "example": "Rua das Flores, 123"
                                     },
                                     "start_date": {
                                         "type": "string",
@@ -789,30 +893,37 @@
                                         "type": "string",
                                         "format": "date"
                                     },
-                                    "actual_start_date": {
-                                        "type": "string",
-                                        "format": "date"
-                                    },
-                                    "actual_end_date": {
-                                        "type": "string",
-                                        "format": "date"
-                                    },
                                     "planned_budget_amount": {
                                         "type": "number",
-                                        "format": "decimal"
-                                    },
-                                    
-                                    "address": {
-                                        "type": "string"
+                                        "example": 500000
                                     }
-                                }
+                                },
+                                "type": "object"
                             }
                         }
                     }
                 },
                 "responses": {
                     "201": {
-                        "description": "Created"
+                        "description": "Projeto criado com sucesso",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Usuário não pertence à empresa"
+                    },
+                    "422": {
+                        "description": "Erro de validação"
                     }
                 },
                 "security": [
@@ -823,24 +934,83 @@
             }
         },
         "/api/v1/projects/{project}": {
+            "get": {
+                "tags": [
+                    "Projects"
+                ],
+                "summary": "Exibir projeto",
+                "description": "Retorna detalhes de um projeto específico",
+                "operationId": "e6c47e85b5ba86fd4315df00515c000b",
+                "parameters": [
+                    {
+                        "name": "X-Company-Id",
+                        "in": "header",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "project",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Detalhes do projeto",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Sem permissão"
+                    },
+                    "404": {
+                        "description": "Projeto não encontrado"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
             "put": {
                 "tags": [
                     "Projects"
                 ],
-                "summary": "Atualizar project",
-                "operationId": "updateProject",
+                "summary": "Atualizar projeto",
+                "description": "Atualiza informações de um projeto existente",
+                "operationId": "ff7410e1a9bd3620dfa89eff0d02c9c4",
                 "parameters": [
-                    {
-                        "name": "project",
-                        "in": "path",
-                        "required": true,
-                        "schema": { "type": "integer" }
-                    },
                     {
                         "name": "X-Company-Id",
                         "in": "header",
                         "required": true,
-                        "schema": { "type": "integer" }
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "project",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
                     }
                 ],
                 "requestBody": {
@@ -848,76 +1018,172 @@
                     "content": {
                         "application/json": {
                             "schema": {
-                                "type": "object",
                                 "properties": {
-                                    "name": { "type": "string" },
-                                    "description": { "type": "string" },
-                                    "status": { "type": "string", "enum": ["planned", "in_progress", "paused", "completed", "cancelled"] },
-                                    "archived_at": { "type": "string", "format": "date" },
-                                    "start_date": { "type": "string", "format": "date" },
-                                    "end_date": { "type": "string", "format": "date" },
-                                    "actual_start_date": { "type": "string", "format": "date" },
-                                    "actual_end_date": { "type": "string", "format": "date" },
-                                    "planned_budget_amount": { "type": "number", "format": "decimal" },
-                                    "manager_user_id": { "type": "integer" },
-                                    "address": { "type": "string" }
-                                }
+                                    "name": {
+                                        "type": "string"
+                                    },
+                                    "description": {
+                                        "type": "string"
+                                    },
+                                    "status": {
+                                        "type": "string",
+                                        "enum": [
+                                            "planning",
+                                            "in_progress",
+                                            "on_hold",
+                                            "completed",
+                                            "canceled"
+                                        ]
+                                    },
+                                    "address": {
+                                        "type": "string"
+                                    },
+                                    "start_date": {
+                                        "type": "string",
+                                        "format": "date"
+                                    },
+                                    "end_date": {
+                                        "type": "string",
+                                        "format": "date"
+                                    }
+                                },
+                                "type": "object"
                             }
                         }
                     }
                 },
                 "responses": {
-                    "200": { "description": "OK" }
+                    "200": {
+                        "description": "Projeto atualizado com sucesso"
+                    },
+                    "403": {
+                        "description": "Sem permissão"
+                    },
+                    "404": {
+                        "description": "Projeto não encontrado"
+                    }
                 },
-                "security": [ { "sanctum": [] } ]
-            },
-            "patch": {
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/projects/{project}/progress": {
+            "get": {
                 "tags": [
-                    "Projects"
+                    "Progress"
                 ],
-                "summary": "Atualizar project (parcial)",
-                "operationId": "patchProject",
+                "summary": "Progresso detalhado do projeto",
+                "description": "Retorna o progresso do projeto calculado com base nas fases e tarefas",
+                "operationId": "c36f21523d6a79974ea4d35c1ae2893a",
                 "parameters": [
-                    {
-                        "name": "project",
-                        "in": "path",
-                        "required": true,
-                        "schema": { "type": "integer" }
-                    },
                     {
                         "name": "X-Company-Id",
                         "in": "header",
                         "required": true,
-                        "schema": { "type": "integer" }
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "project",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
                     }
                 ],
-                "requestBody": {
-                    "required": true,
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "type": "object",
-                                "properties": {
-                                    "name": { "type": "string" },
-                                    "description": { "type": "string" },
-                                    "status": { "type": "string", "enum": ["planned", "in_progress", "paused", "completed", "cancelled"] },
-                                    "archived_at": { "type": "string", "format": "date" },
-                                    "start_date": { "type": "string", "format": "date" },
-                                    "end_date": { "type": "string", "format": "date" },
-                                    "actual_start_date": { "type": "string", "format": "date" },
-                                    "actual_end_date": { "type": "string", "format": "date" },
-                                    "planned_budget_amount": { "type": "number", "format": "decimal" },
-                                    "manager_user_id": { "type": "integer" },
-                                    "address": { "type": "string" }
+                "responses": {
+                    "200": {
+                        "description": "Progresso do projeto",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "project_id": {
+                                            "type": "integer"
+                                        },
+                                        "project_progress_percent": {
+                                            "type": "integer"
+                                        },
+                                        "phases": {
+                                            "type": "array",
+                                            "items": {}
+                                        }
+                                    },
+                                    "type": "object"
                                 }
                             }
                         }
                     }
                 },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/projects/{project}/tasks": {
+            "get": {
+                "tags": [
+                    "Tasks"
+                ],
+                "summary": "Listar tarefas do projeto",
+                "description": "Retorna todas as tarefas de um projeto com filtros opcionais",
+                "operationId": "fdd782c4a5fa76d48f0775aff6683721",
+                "parameters": [
+                    {
+                        "name": "X-Company-Id",
+                        "in": "header",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "project",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "phase_id",
+                        "in": "query",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "status",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "assignee_id",
+                        "in": "query",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
                 "responses": {
-                    "200": { "description": "OK" }
+                    "200": {
+                        "description": "Lista de tarefas"
+                    }
                 },
-                "security": [ { "sanctum": [] } ]
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
             }
         }
     },
@@ -932,16 +1198,40 @@
     },
     "tags": [
         {
-            "name": "Auth",
-            "description": "Auth"
+            "name": "Companies",
+            "description": "Gerenciamento de empresas"
         },
         {
-            "name": "Admin",
-            "description": "Admin RBAC"
+            "name": "Contractors",
+            "description": "Gerenciamento de empreiteiros"
+        },
+        {
+            "name": "Documents",
+            "description": "Gerenciamento de documentos do projeto"
+        },
+        {
+            "name": "Me",
+            "description": "Operações do usuário autenticado"
+        },
+        {
+            "name": "Phases",
+            "description": "Gerenciamento de fases do projeto"
         },
         {
             "name": "Projects",
-            "description": "Projects"
+            "description": "Gerenciamento de projetos/obras"
+        },
+        {
+            "name": "Progress",
+            "description": "Progresso e estatísticas"
+        },
+        {
+            "name": "Tasks",
+            "description": "Gerenciamento de tarefas do projeto"
+        },
+        {
+            "name": "Auth",
+            "description": "Auth"
         }
     ]
 }

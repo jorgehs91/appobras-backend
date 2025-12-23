@@ -15,6 +15,10 @@ class AuthServiceProvider extends ServiceProvider
      */
     protected $policies = [
         \App\Models\User::class => \App\Policies\UserPolicy::class,
+        \App\Models\Phase::class => \App\Policies\PhasePolicy::class,
+        \App\Models\Task::class => \App\Policies\TaskPolicy::class,
+        \App\Models\Contractor::class => \App\Policies\ContractorPolicy::class,
+        \App\Models\Document::class => \App\Policies\DocumentPolicy::class,
     ];
 
     public function boot(): void

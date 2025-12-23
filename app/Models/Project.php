@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\ProjectStatus;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -38,6 +39,7 @@ class Project extends Model
     protected function casts(): array
     {
         return [
+            'status' => ProjectStatus::class,
             'archived_at' => 'datetime',
             'start_date' => 'date',
             'end_date' => 'date',
@@ -58,6 +60,47 @@ class Project extends Model
     public function memberships()
     {
         return $this->hasMany(ProjectMember::class, 'project_id');
+    }
+
+    /**
+     * Get the phases for the project.
+     */
+    public function phases()
+    {
+        return $this->hasMany(Phase::class);
+    }
+
+    /**
+     * Get the tasks for the project.
+     */
+    public function tasks()
+    {
+        return $this->hasMany(Task::class);
+    }
+
+    /**
+     * Get the documents for the project.
+     */
+    public function documents()
+    {
+        return $this->hasMany(Document::class);
+    }
+
+    /**
+     * Calculate progress percentage based on active phases.
+     * Returns average of phase progress (only active phases).
+     */
+    public function getProgressPercentAttribute(): int
+    {
+        $activePhases = $this->phases()->where('status', 'active')->get();
+        
+        if ($activePhases->isEmpty()) {
+            return 0;
+        }
+        
+        $sum = $activePhases->sum(fn($phase) => $phase->progress_percent);
+        
+        return (int) round($sum / $activePhases->count());
     }
 }
 

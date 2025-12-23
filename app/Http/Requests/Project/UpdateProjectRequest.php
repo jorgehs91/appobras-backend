@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Project;
 
+use App\Enums\ProjectStatus;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Carbon;
 use Illuminate\Validation\Rule;
@@ -24,7 +25,7 @@ class UpdateProjectRequest extends FormRequest
             'company_id' => ['prohibited'],
             'name' => ['sometimes', 'string', 'min:2', 'max:255', 'unique:projects,name,'.$this->route('project')->id.',id,company_id,'.$companyId],
             'description' => ['sometimes', 'nullable', 'string', 'max:2000'],
-            'status' => ['sometimes', 'string', Rule::in(['planned', 'in_progress', 'paused', 'completed', 'cancelled'])],
+            'status' => ['sometimes', 'string', Rule::in(array_column(ProjectStatus::cases(), 'value'))],
             'archived_at' => ['sometimes', 'nullable', 'date'],
             'start_date' => ['sometimes', 'nullable', 'date'],
             'end_date' => ['sometimes', 'nullable', 'date'],

@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Project;
 
+use App\Enums\ProjectStatus;
 use Illuminate\Foundation\Http\FormRequest;
 
 class StoreProjectRequest extends FormRequest
@@ -29,7 +30,7 @@ class StoreProjectRequest extends FormRequest
                 'unique:projects,name,NULL,id,company_id,'.$companyId,
             ],
             'description' => ['nullable', 'string', 'max:2000'],
-            'status' => ['nullable', 'string', 'in:planned,in_progress,paused,completed,cancelled'],
+            'status' => ['nullable', 'string', 'in:'.implode(',', array_column(ProjectStatus::cases(), 'value'))],
             'archived_at' => ['nullable', 'date'],
             'start_date' => ['nullable', 'date'],
             'end_date' => ['nullable', 'date', 'after_or_equal:start_date'],

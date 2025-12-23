@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use App\Models\Task;
+use App\Observers\TaskObserver;
 use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
@@ -23,6 +25,9 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // Register observers
+        Task::observe(TaskObserver::class);
+
         RateLimiter::for('login', function (Request $request) {
             $email = (string) $request->input('email');
 

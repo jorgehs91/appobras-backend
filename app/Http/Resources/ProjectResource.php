@@ -17,7 +17,7 @@ class ProjectResource extends JsonResource
             'company_id' => $this->company_id,
             'name' => $this->name,
             'description' => $this->description,
-            'status' => $this->status,
+            'status' => $this->status?->value,
             'archived_at' => optional($this->archived_at)?->toISOString(),
             'start_date' => optional($this->start_date)?->toDateString(),
             'end_date' => optional($this->end_date)?->toDateString(),

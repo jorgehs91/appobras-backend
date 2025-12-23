@@ -146,6 +146,40 @@ class ProjectsTest extends TestCase
         $this->assertEquals('completed', $p->status);
         $this->assertNotNull($p->actual_end_date);
     }
+
+    public function test_show_project_sucesso_quando_membro(): void
+    {
+        $user = User::factory()->create();
+        $company = Company::query()->create(['name' => 'C1']);
+        $user->companies()->attach($company->id);
+        Sanctum::actingAs($user);
+
+        $p = Project::query()->create([
+            'company_id' => $company->id,
+            'name' => 'P1',
+        ]);
+        $user->projects()->attach($p->id, ['role' => 'Viewer']);
+
+        $this->getJson('/api/v1/projects/'.$p->id, ['X-Company-Id' => $company->id])
+            ->assertOk()
+            ->assertJsonPath('data.id', $p->id);
+    }
+
+    public function test_show_project_403_quando_nao_membro(): void
+    {
+        $user = User::factory()->create();
+        $company = Company::query()->create(['name' => 'C1']);
+        $user->companies()->attach($company->id);
+        Sanctum::actingAs($user);
+
+        $p = Project::query()->create([
+            'company_id' => $company->id,
+            'name' => 'P1',
+        ]);
+
+        $this->getJson('/api/v1/projects/'.$p->id, ['X-Company-Id' => $company->id])
+            ->assertStatus(403);
+    }
 }
 
 

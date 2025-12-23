@@ -3,9 +3,15 @@
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\Admin\RoleController;
 use App\Http\Controllers\CompanyController;
-use App\Http\Controllers\ProjectController;
+use App\Http\Controllers\ContractorController;
+use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\DocumentController;
 use App\Http\Controllers\InviteController;
 use App\Http\Controllers\MeController;
+use App\Http\Controllers\PhaseController;
+use App\Http\Controllers\ProjectController;
+use App\Http\Controllers\ProjectProgressController;
+use App\Http\Controllers\TaskController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('v1')->group(function (): void {
@@ -46,7 +52,36 @@ Route::prefix('v1')->group(function (): void {
         Route::middleware(['company'])->group(function (): void {
             Route::get('/projects', [ProjectController::class, 'index']);
             Route::post('/projects', [ProjectController::class, 'store']);
+            Route::get('/projects/{project}', [ProjectController::class, 'show']);
             Route::match(['put', 'patch'], '/projects/{project}', [ProjectController::class, 'update']);
+
+            // Contractors (escopo company)
+            Route::get('/contractors', [ContractorController::class, 'index']);
+            Route::post('/contractors', [ContractorController::class, 'store']);
+            Route::put('/contractors/{contractor}', [ContractorController::class, 'update']);
+            Route::delete('/contractors/{contractor}', [ContractorController::class, 'destroy']);
+
+            // Phases (escopo project)
+            Route::get('/projects/{project}/phases', [PhaseController::class, 'index']);
+            Route::post('/projects/{project}/phases', [PhaseController::class, 'store']);
+            Route::put('/phases/{phase}', [PhaseController::class, 'update']);
+            Route::delete('/phases/{phase}', [PhaseController::class, 'destroy']);
+
+            // Tasks (escopo project)
+            Route::get('/projects/{project}/tasks', [TaskController::class, 'index']);
+            Route::post('/projects/{project}/tasks', [TaskController::class, 'store']);
+            Route::put('/tasks/{task}', [TaskController::class, 'update']);
+            Route::patch('/tasks/{task}/status', [TaskController::class, 'updateStatus']);
+            Route::delete('/tasks/{task}', [TaskController::class, 'destroy']);
+
+            // Documents (escopo project)
+            Route::get('/projects/{project}/documents', [DocumentController::class, 'index']);
+            Route::post('/projects/{project}/documents', [DocumentController::class, 'store']);
+            Route::delete('/documents/{document}', [DocumentController::class, 'destroy']);
+
+            // Progress & Stats
+            Route::get('/projects/{project}/progress', [ProjectProgressController::class, 'show']);
+            Route::get('/dashboard/stats', [DashboardController::class, 'stats']);
         });
     });
 });
