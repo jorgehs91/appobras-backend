@@ -72,8 +72,11 @@ class ProjectController extends Controller
 
         $query = Project::query()
             ->where('company_id', $companyId)
-            ->whereHas('users', function ($q) use ($user): void {
-                $q->whereKey($user->id);
+            ->where(function ($q) use ($user): void {
+                $q->whereHas('users', function ($subQ) use ($user): void {
+                    $subQ->whereKey($user->id);
+                })
+                ->orWhere('manager_user_id', $user->id);
             })
             ->orderBy('name');
 
@@ -199,10 +202,12 @@ class ProjectController extends Controller
         $user = $request->user();
         $companyId = (int) $request->header('X-Company-Id');
 
-        // Tenancy + membership no projeto
+        // Tenancy + acesso ao projeto (membership OU ser manager)
         abort_unless($companyId && $user->companies()->whereKey($companyId)->exists(), 403);
         abort_unless($project->company_id === $companyId, 403);
-        abort_unless($user->projects()->whereKey($project->id)->exists(), 403);
+        $hasAccess = $user->projects()->whereKey($project->id)->exists()
+            || $project->manager_user_id === $user->id;
+        abort_unless($hasAccess, 403);
 
         $data = $request->validated();
 
@@ -261,7 +266,11 @@ class ProjectController extends Controller
 
         abort_unless($companyId && $user->companies()->whereKey($companyId)->exists(), 403);
         abort_unless($project->company_id === $companyId, 403);
-        abort_unless($user->projects()->whereKey($project->id)->exists(), 403);
+        
+        // Verificar acesso: membership na tabela pivot OU ser manager do projeto
+        $hasAccess = $user->projects()->whereKey($project->id)->exists()
+            || $project->manager_user_id === $user->id;
+        abort_unless($hasAccess, 403);
 
         return (new ProjectResource($project))->response();
     }
