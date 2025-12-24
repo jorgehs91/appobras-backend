@@ -143,7 +143,7 @@ class ProjectsTest extends TestCase
             ->assertOk();
 
         $p->refresh();
-        $this->assertEquals('completed', $p->status);
+        $this->assertEquals('completed', $p->status->value);
         $this->assertNotNull($p->actual_end_date);
     }
 
@@ -178,6 +178,88 @@ class ProjectsTest extends TestCase
         ]);
 
         $this->getJson('/api/v1/projects/'.$p->id, ['X-Company-Id' => $company->id])
+            ->assertStatus(403);
+    }
+
+    public function test_project_progress_shows_phases_breakdown(): void
+    {
+        $user = User::factory()->create();
+        $company = Company::query()->create(['name' => 'C1']);
+        $user->companies()->attach($company->id);
+        Sanctum::actingAs($user);
+
+        $p = Project::query()->create([
+            'company_id' => $company->id,
+            'name' => 'P1',
+        ]);
+        $user->projects()->attach($p->id, ['role' => 'Viewer']);
+
+        // Create active phases
+        \App\Models\Phase::factory()->count(2)->create([
+            'company_id' => $company->id,
+            'project_id' => $p->id,
+            'status' => 'active',
+        ]);
+
+        $this->getJson('/api/v1/projects/'.$p->id.'/progress', ['X-Company-Id' => $company->id])
+            ->assertOk()
+            ->assertJsonStructure([
+                'project_id',
+                'project_progress_percent',
+                'phases' => [
+                    '*' => ['id', 'name', 'status', 'progress_percent', 'tasks_count'],
+                ],
+            ])
+            ->assertJsonPath('project_id', $p->id);
+    }
+
+    public function test_project_progress_only_shows_active_phases(): void
+    {
+        $user = User::factory()->create();
+        $company = Company::query()->create(['name' => 'C1']);
+        $user->companies()->attach($company->id);
+        Sanctum::actingAs($user);
+
+        $p = Project::query()->create([
+            'company_id' => $company->id,
+            'name' => 'P1',
+        ]);
+        $user->projects()->attach($p->id, ['role' => 'Viewer']);
+
+        // Create 2 active phases and 1 archived
+        \App\Models\Phase::factory()->count(2)->create([
+            'company_id' => $company->id,
+            'project_id' => $p->id,
+            'status' => 'active',
+        ]);
+
+        \App\Models\Phase::factory()->create([
+            'company_id' => $company->id,
+            'project_id' => $p->id,
+            'status' => 'archived',
+        ]);
+
+        $response = $this->getJson('/api/v1/projects/'.$p->id.'/progress', ['X-Company-Id' => $company->id])
+            ->assertOk();
+
+        // Should only return the 2 active phases
+        $this->assertCount(2, $response->json('phases'));
+    }
+
+    public function test_cannot_view_progress_without_project_membership(): void
+    {
+        $user = User::factory()->create();
+        $company = Company::query()->create(['name' => 'C1']);
+        $user->companies()->attach($company->id);
+        Sanctum::actingAs($user);
+
+        $p = Project::query()->create([
+            'company_id' => $company->id,
+            'name' => 'P1',
+        ]);
+        // User is NOT a member of this project
+
+        $this->getJson('/api/v1/projects/'.$p->id.'/progress', ['X-Company-Id' => $company->id])
             ->assertStatus(403);
     }
 }

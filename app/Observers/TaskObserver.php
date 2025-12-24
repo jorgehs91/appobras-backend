@@ -29,7 +29,7 @@ class TaskObserver
             }
 
             // When task moves away from done to another status, clear completed_at
-            if ($oldStatus === 'done' && $newStatus !== TaskStatus::done) {
+            if ($oldStatus === TaskStatus::done->value && $newStatus !== TaskStatus::done) {
                 $task->completed_at = null;
             }
         }

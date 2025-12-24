@@ -9,7 +9,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('projects', function (Blueprint $table): void {
-            $table->string('status')->default('planned')->after('description');
+            $table->string('status')->default('planning')->after('description');
             $table->timestamp('archived_at')->nullable()->after('status');
             $table->date('start_date')->nullable()->after('archived_at');
             $table->date('end_date')->nullable()->after('start_date');
