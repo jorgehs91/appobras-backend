@@ -182,4 +182,3 @@ Após conclusão do plano:
 - ✅ 100% de cobertura dos endpoints da API
 - ✅ Todos os cenários de sucesso testados
 - ✅ Todos os cenários de erro (401, 403, 404, 422) testados
-- ✅ Validações de isolamento de dados entre companies

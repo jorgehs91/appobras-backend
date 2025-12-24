@@ -70,7 +70,43 @@ class TaskController extends Controller
     }
 
     /**
-     * Store a newly created task.
+     * @OA\Post(
+     *     path="/api/v1/projects/{project}/tasks",
+     *     summary="Criar tarefa",
+     *     description="Cria uma nova tarefa no projeto",
+     *     tags={"Tasks"},
+     *     security={{"sanctum":{}}},
+     *     @OA\Parameter(name="X-Company-Id", in="header", required=true, @OA\Schema(type="integer")),
+     *     @OA\Parameter(name="project", in="path", required=true, @OA\Schema(type="integer")),
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"phase_id", "title"},
+     *             @OA\Property(property="phase_id", type="integer", example=1),
+     *             @OA\Property(property="title", type="string", example="Instalar estrutura metálica"),
+     *             @OA\Property(property="description", type="string"),
+     *             @OA\Property(property="status", type="string", enum={"backlog", "in_progress", "in_review", "done", "canceled"}),
+     *             @OA\Property(property="priority", type="string", enum={"low", "medium", "high", "urgent"}),
+     *             @OA\Property(property="order_in_phase", type="integer", example=1),
+     *             @OA\Property(property="assignee_id", type="integer"),
+     *             @OA\Property(property="contractor_id", type="integer"),
+     *             @OA\Property(property="is_blocked", type="boolean"),
+     *             @OA\Property(property="blocked_reason", type="string"),
+     *             @OA\Property(property="planned_start_at", type="string", format="date"),
+     *             @OA\Property(property="planned_end_at", type="string", format="date"),
+     *             @OA\Property(property="due_at", type="string", format="date")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=201,
+     *         description="Tarefa criada com sucesso",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="data", type="object")
+     *         )
+     *     ),
+     *     @OA\Response(response=403, description="Sem permissão"),
+     *     @OA\Response(response=422, description="Erro de validação")
+     * )
      */
     public function store(StoreTaskRequest $request, Project $project): JsonResponse
     {
@@ -92,7 +128,43 @@ class TaskController extends Controller
     }
 
     /**
-     * Update the specified task.
+     * @OA\Put(
+     *     path="/api/v1/tasks/{task}",
+     *     summary="Atualizar tarefa",
+     *     description="Atualiza informações de uma tarefa existente",
+     *     tags={"Tasks"},
+     *     security={{"sanctum":{}}},
+     *     @OA\Parameter(name="X-Company-Id", in="header", required=true, @OA\Schema(type="integer")),
+     *     @OA\Parameter(name="task", in="path", required=true, @OA\Schema(type="integer")),
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             @OA\Property(property="phase_id", type="integer"),
+     *             @OA\Property(property="title", type="string"),
+     *             @OA\Property(property="description", type="string"),
+     *             @OA\Property(property="status", type="string", enum={"backlog", "in_progress", "in_review", "done", "canceled"}),
+     *             @OA\Property(property="priority", type="string", enum={"low", "medium", "high", "urgent"}),
+     *             @OA\Property(property="order_in_phase", type="integer"),
+     *             @OA\Property(property="assignee_id", type="integer"),
+     *             @OA\Property(property="contractor_id", type="integer"),
+     *             @OA\Property(property="is_blocked", type="boolean"),
+     *             @OA\Property(property="blocked_reason", type="string"),
+     *             @OA\Property(property="planned_start_at", type="string", format="date"),
+     *             @OA\Property(property="planned_end_at", type="string", format="date"),
+     *             @OA\Property(property="due_at", type="string", format="date")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Tarefa atualizada com sucesso",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="data", type="object")
+     *         )
+     *     ),
+     *     @OA\Response(response=403, description="Sem permissão"),
+     *     @OA\Response(response=404, description="Tarefa não encontrada"),
+     *     @OA\Response(response=422, description="Erro de validação")
+     * )
      */
     public function update(UpdateTaskRequest $request, Task $task): JsonResponse
     {
@@ -111,7 +183,32 @@ class TaskController extends Controller
     }
 
     /**
-     * Update only the status of the task (shortcut for Kanban drag-and-drop).
+     * @OA\Patch(
+     *     path="/api/v1/tasks/{task}/status",
+     *     summary="Atualizar status da tarefa",
+     *     description="Atualiza apenas o status da tarefa (atalho para drag-and-drop no Kanban)",
+     *     tags={"Tasks"},
+     *     security={{"sanctum":{}}},
+     *     @OA\Parameter(name="X-Company-Id", in="header", required=true, @OA\Schema(type="integer")),
+     *     @OA\Parameter(name="task", in="path", required=true, @OA\Schema(type="integer")),
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"status"},
+     *             @OA\Property(property="status", type="string", enum={"backlog", "in_progress", "in_review", "done", "canceled"}, example="in_progress")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Status atualizado com sucesso",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="data", type="object")
+     *         )
+     *     ),
+     *     @OA\Response(response=403, description="Sem permissão"),
+     *     @OA\Response(response=404, description="Tarefa não encontrada"),
+     *     @OA\Response(response=422, description="Erro de validação")
+     * )
      */
     public function updateStatus(UpdateTaskStatusRequest $request, Task $task): JsonResponse
     {
@@ -130,7 +227,21 @@ class TaskController extends Controller
     }
 
     /**
-     * Remove the specified task (soft delete).
+     * @OA\Delete(
+     *     path="/api/v1/tasks/{task}",
+     *     summary="Remover tarefa",
+     *     description="Remove uma tarefa (soft delete)",
+     *     tags={"Tasks"},
+     *     security={{"sanctum":{}}},
+     *     @OA\Parameter(name="X-Company-Id", in="header", required=true, @OA\Schema(type="integer")),
+     *     @OA\Parameter(name="task", in="path", required=true, @OA\Schema(type="integer")),
+     *     @OA\Response(
+     *         response=204,
+     *         description="Tarefa removida com sucesso"
+     *     ),
+     *     @OA\Response(response=403, description="Sem permissão"),
+     *     @OA\Response(response=404, description="Tarefa não encontrada")
+     * )
      */
     public function destroy(Request $request, Task $task): JsonResponse
     {

@@ -57,7 +57,37 @@ class PhaseController extends Controller
     }
 
     /**
-     * Store a newly created phase.
+     * @OA\Post(
+     *     path="/api/v1/projects/{project}/phases",
+     *     summary="Criar fase",
+     *     description="Cria uma nova fase no projeto",
+     *     tags={"Phases"},
+     *     security={{"sanctum":{}}},
+     *     @OA\Parameter(name="X-Company-Id", in="header", required=true, @OA\Schema(type="integer")),
+     *     @OA\Parameter(name="project", in="path", required=true, @OA\Schema(type="integer")),
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"name"},
+     *             @OA\Property(property="name", type="string", example="Fundação"),
+     *             @OA\Property(property="description", type="string"),
+     *             @OA\Property(property="status", type="string", enum={"draft", "active", "archived"}),
+     *             @OA\Property(property="sequence", type="integer", example=1),
+     *             @OA\Property(property="color", type="string", example="#FF5733"),
+     *             @OA\Property(property="planned_start_at", type="string", format="date"),
+     *             @OA\Property(property="planned_end_at", type="string", format="date")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=201,
+     *         description="Fase criada com sucesso",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="data", type="object")
+     *         )
+     *     ),
+     *     @OA\Response(response=403, description="Sem permissão"),
+     *     @OA\Response(response=422, description="Erro de validação")
+     * )
      */
     public function store(StorePhaseRequest $request, Project $project): JsonResponse
     {
@@ -79,7 +109,39 @@ class PhaseController extends Controller
     }
 
     /**
-     * Update the specified phase.
+     * @OA\Put(
+     *     path="/api/v1/phases/{phase}",
+     *     summary="Atualizar fase",
+     *     description="Atualiza informações de uma fase existente",
+     *     tags={"Phases"},
+     *     security={{"sanctum":{}}},
+     *     @OA\Parameter(name="X-Company-Id", in="header", required=true, @OA\Schema(type="integer")),
+     *     @OA\Parameter(name="phase", in="path", required=true, @OA\Schema(type="integer")),
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             @OA\Property(property="name", type="string"),
+     *             @OA\Property(property="description", type="string"),
+     *             @OA\Property(property="status", type="string", enum={"draft", "active", "archived"}),
+     *             @OA\Property(property="sequence", type="integer"),
+     *             @OA\Property(property="color", type="string", example="#FF5733"),
+     *             @OA\Property(property="planned_start_at", type="string", format="date"),
+     *             @OA\Property(property="planned_end_at", type="string", format="date"),
+     *             @OA\Property(property="actual_start_at", type="string", format="date"),
+     *             @OA\Property(property="actual_end_at", type="string", format="date")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Fase atualizada com sucesso",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="data", type="object")
+     *         )
+     *     ),
+     *     @OA\Response(response=403, description="Sem permissão"),
+     *     @OA\Response(response=404, description="Fase não encontrada"),
+     *     @OA\Response(response=422, description="Erro de validação")
+     * )
      */
     public function update(UpdatePhaseRequest $request, Phase $phase): JsonResponse
     {
@@ -98,7 +160,28 @@ class PhaseController extends Controller
     }
 
     /**
-     * Remove the specified phase (soft delete).
+     * @OA\Delete(
+     *     path="/api/v1/phases/{phase}",
+     *     summary="Remover fase",
+     *     description="Remove uma fase (soft delete). Não é possível remover fases que contêm tarefas",
+     *     tags={"Phases"},
+     *     security={{"sanctum":{}}},
+     *     @OA\Parameter(name="X-Company-Id", in="header", required=true, @OA\Schema(type="integer")),
+     *     @OA\Parameter(name="phase", in="path", required=true, @OA\Schema(type="integer")),
+     *     @OA\Response(
+     *         response=204,
+     *         description="Fase removida com sucesso"
+     *     ),
+     *     @OA\Response(response=403, description="Sem permissão"),
+     *     @OA\Response(response=404, description="Fase não encontrada"),
+     *     @OA\Response(
+     *         response=422,
+     *         description="Não é possível deletar uma fase que contém tarefas",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Não é possível deletar uma fase que contém tarefas.")
+     *         )
+     *     )
+     * )
      */
     public function destroy(Request $request, Phase $phase): JsonResponse
     {

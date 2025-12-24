@@ -12,6 +12,288 @@
         }
     ],
     "paths": {
+        "/api/v1/admin/roles": {
+            "get": {
+                "tags": [
+                    "Admin"
+                ],
+                "summary": "Listar roles",
+                "description": "Retorna todas as roles disponíveis no sistema",
+                "operationId": "90631fac9c850d5d94147a2809e94f31",
+                "parameters": [
+                    {
+                        "name": "X-Company-Id",
+                        "in": "header",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Lista de roles",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "name": {
+                                                        "type": "string",
+                                                        "example": "Admin Obra"
+                                                    },
+                                                    "guard_name": {
+                                                        "type": "string",
+                                                        "example": "sanctum"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Sem permissão"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/admin/permissions": {
+            "get": {
+                "tags": [
+                    "Admin"
+                ],
+                "summary": "Listar permissões",
+                "description": "Retorna todas as permissões disponíveis no sistema",
+                "operationId": "33596e41940f5354d0258fc4534cf10d",
+                "parameters": [
+                    {
+                        "name": "X-Company-Id",
+                        "in": "header",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Lista de permissões",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "name": {
+                                                        "type": "string",
+                                                        "example": "users.update"
+                                                    },
+                                                    "guard_name": {
+                                                        "type": "string",
+                                                        "example": "sanctum"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Sem permissão"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/admin/roles/{role}/assign": {
+            "post": {
+                "tags": [
+                    "Admin"
+                ],
+                "summary": "Atribuir role",
+                "description": "Atribui uma role a um usuário",
+                "operationId": "29bc0b6c9fc4d47c6299cc601ec1d115",
+                "parameters": [
+                    {
+                        "name": "X-Company-Id",
+                        "in": "header",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "role",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "user_id"
+                                ],
+                                "properties": {
+                                    "user_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Role atribuída com sucesso",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Role assigned"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Sem permissão"
+                    },
+                    "404": {
+                        "description": "Role ou usuário não encontrado"
+                    },
+                    "422": {
+                        "description": "Erro de validação"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/admin/roles/{role}/revoke": {
+            "post": {
+                "tags": [
+                    "Admin"
+                ],
+                "summary": "Revogar role",
+                "description": "Revoga uma role de um usuário",
+                "operationId": "e4b647e552f2014281d6a93914d722f5",
+                "parameters": [
+                    {
+                        "name": "X-Company-Id",
+                        "in": "header",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "role",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "user_id"
+                                ],
+                                "properties": {
+                                    "user_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Role revogada com sucesso",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Role revoked"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Sem permissão"
+                    },
+                    "404": {
+                        "description": "Role ou usuário não encontrado"
+                    },
+                    "422": {
+                        "description": "Erro de validação"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
         "/api/v1/auth/register": {
             "post": {
                 "tags": [
@@ -489,6 +771,131 @@
                 ]
             }
         },
+        "/api/v1/contractors/{contractor}": {
+            "put": {
+                "tags": [
+                    "Contractors"
+                ],
+                "summary": "Atualizar empreiteiro",
+                "description": "Atualiza informações de um empreiteiro existente",
+                "operationId": "bb46251f14d7c2162f2c3c12a04c2c27",
+                "parameters": [
+                    {
+                        "name": "X-Company-Id",
+                        "in": "header",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "contractor",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "example": "Construtora ABC"
+                                    },
+                                    "contact": {
+                                        "type": "string",
+                                        "example": "(11) 98765-4321"
+                                    },
+                                    "specialties": {
+                                        "type": "string",
+                                        "example": "Fundação, Estrutura"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Empreiteiro atualizado com sucesso",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Sem permissão"
+                    },
+                    "404": {
+                        "description": "Empreiteiro não encontrado"
+                    },
+                    "422": {
+                        "description": "Erro de validação"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Contractors"
+                ],
+                "summary": "Remover empreiteiro",
+                "description": "Remove um empreiteiro (soft delete)",
+                "operationId": "f09b98a2286ca36c4748421fb3c2d19f",
+                "parameters": [
+                    {
+                        "name": "X-Company-Id",
+                        "in": "header",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "contractor",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Empreiteiro removido com sucesso"
+                    },
+                    "403": {
+                        "description": "Sem permissão"
+                    },
+                    "404": {
+                        "description": "Empreiteiro não encontrado"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
         "/api/v1/dashboard/stats": {
             "get": {
                 "tags": [
@@ -575,6 +982,259 @@
                 "responses": {
                     "200": {
                         "description": "Lista de documentos"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Documents"
+                ],
+                "summary": "Upload de documento",
+                "description": "Faz upload de um documento para o projeto",
+                "operationId": "6218bfea75ccc43e87ca1fe6405fff41",
+                "parameters": [
+                    {
+                        "name": "X-Company-Id",
+                        "in": "header",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "project",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "required": [
+                                    "file"
+                                ],
+                                "properties": {
+                                    "file": {
+                                        "description": "Arquivo a ser enviado (PDF, JPG, PNG, DOC, DOCX, XLS, XLSX - máx. 10MB)",
+                                        "type": "string",
+                                        "format": "binary"
+                                    },
+                                    "name": {
+                                        "type": "string",
+                                        "example": "Planta Baixa"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Documento enviado com sucesso",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Sem permissão"
+                    },
+                    "422": {
+                        "description": "Erro de validação"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/documents/{document}": {
+            "delete": {
+                "tags": [
+                    "Documents"
+                ],
+                "summary": "Remover documento",
+                "description": "Remove um documento (soft delete) e exclui o arquivo do storage",
+                "operationId": "8215d99153c61fc0a495a9a9e437be25",
+                "parameters": [
+                    {
+                        "name": "X-Company-Id",
+                        "in": "header",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "document",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Documento removido com sucesso"
+                    },
+                    "403": {
+                        "description": "Sem permissão"
+                    },
+                    "404": {
+                        "description": "Documento não encontrado"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/companies/{company}/invites": {
+            "post": {
+                "tags": [
+                    "Invites"
+                ],
+                "summary": "Criar convite",
+                "description": "Cria um convite para adicionar um usuário à empresa",
+                "operationId": "e6a71cd1ba9abafa42652b490e7915ec",
+                "parameters": [
+                    {
+                        "name": "X-Company-Id",
+                        "in": "header",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "company",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "email"
+                                ],
+                                "properties": {
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "usuario@example.com"
+                                    },
+                                    "role_name": {
+                                        "type": "string",
+                                        "example": "Admin Obra"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Convite criado com sucesso",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "token": {
+                                            "type": "string",
+                                            "example": "abc123def456..."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Sem permissão"
+                    },
+                    "404": {
+                        "description": "Empresa não encontrada"
+                    },
+                    "422": {
+                        "description": "Erro de validação"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/invites/{token}/accept": {
+            "post": {
+                "tags": [
+                    "Invites"
+                ],
+                "summary": "Aceitar convite",
+                "description": "Aceita um convite para ingressar em uma empresa",
+                "operationId": "2c944cf259e4527a5b6e685d6068d8f9",
+                "parameters": [
+                    {
+                        "name": "token",
+                        "in": "path",
+                        "description": "Token do convite",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Convite aceito com sucesso",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Invite accepted"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Convite não encontrado ou expirado"
                     }
                 },
                 "security": [
@@ -755,6 +1415,272 @@
                 "responses": {
                     "200": {
                         "description": "Lista de fases com progresso"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Phases"
+                ],
+                "summary": "Criar fase",
+                "description": "Cria uma nova fase no projeto",
+                "operationId": "7401f41d9e1d8f64b65fa4e9f31b3bea",
+                "parameters": [
+                    {
+                        "name": "X-Company-Id",
+                        "in": "header",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "project",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "name"
+                                ],
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "example": "Fundação"
+                                    },
+                                    "description": {
+                                        "type": "string"
+                                    },
+                                    "status": {
+                                        "type": "string",
+                                        "enum": [
+                                            "draft",
+                                            "active",
+                                            "archived"
+                                        ]
+                                    },
+                                    "sequence": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "color": {
+                                        "type": "string",
+                                        "example": "#FF5733"
+                                    },
+                                    "planned_start_at": {
+                                        "type": "string",
+                                        "format": "date"
+                                    },
+                                    "planned_end_at": {
+                                        "type": "string",
+                                        "format": "date"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Fase criada com sucesso",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Sem permissão"
+                    },
+                    "422": {
+                        "description": "Erro de validação"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/phases/{phase}": {
+            "put": {
+                "tags": [
+                    "Phases"
+                ],
+                "summary": "Atualizar fase",
+                "description": "Atualiza informações de uma fase existente",
+                "operationId": "531ca5d6cd5774be86bf805fe63450ab",
+                "parameters": [
+                    {
+                        "name": "X-Company-Id",
+                        "in": "header",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "phase",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "name": {
+                                        "type": "string"
+                                    },
+                                    "description": {
+                                        "type": "string"
+                                    },
+                                    "status": {
+                                        "type": "string",
+                                        "enum": [
+                                            "draft",
+                                            "active",
+                                            "archived"
+                                        ]
+                                    },
+                                    "sequence": {
+                                        "type": "integer"
+                                    },
+                                    "color": {
+                                        "type": "string",
+                                        "example": "#FF5733"
+                                    },
+                                    "planned_start_at": {
+                                        "type": "string",
+                                        "format": "date"
+                                    },
+                                    "planned_end_at": {
+                                        "type": "string",
+                                        "format": "date"
+                                    },
+                                    "actual_start_at": {
+                                        "type": "string",
+                                        "format": "date"
+                                    },
+                                    "actual_end_at": {
+                                        "type": "string",
+                                        "format": "date"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Fase atualizada com sucesso",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Sem permissão"
+                    },
+                    "404": {
+                        "description": "Fase não encontrada"
+                    },
+                    "422": {
+                        "description": "Erro de validação"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Phases"
+                ],
+                "summary": "Remover fase",
+                "description": "Remove uma fase (soft delete). Não é possível remover fases que contêm tarefas",
+                "operationId": "c02a809cf6ed0799f7e6b66862edd72e",
+                "parameters": [
+                    {
+                        "name": "X-Company-Id",
+                        "in": "header",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "phase",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Fase removida com sucesso"
+                    },
+                    "403": {
+                        "description": "Sem permissão"
+                    },
+                    "404": {
+                        "description": "Fase não encontrada"
+                    },
+                    "422": {
+                        "description": "Não é possível deletar uma fase que contém tarefas",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Não é possível deletar uma fase que contém tarefas."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
                     }
                 },
                 "security": [
@@ -1184,6 +2110,387 @@
                         "sanctum": []
                     }
                 ]
+            },
+            "post": {
+                "tags": [
+                    "Tasks"
+                ],
+                "summary": "Criar tarefa",
+                "description": "Cria uma nova tarefa no projeto",
+                "operationId": "79be8596790aea0d4a76e69da9474240",
+                "parameters": [
+                    {
+                        "name": "X-Company-Id",
+                        "in": "header",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "project",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "phase_id",
+                                    "title"
+                                ],
+                                "properties": {
+                                    "phase_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "title": {
+                                        "type": "string",
+                                        "example": "Instalar estrutura metálica"
+                                    },
+                                    "description": {
+                                        "type": "string"
+                                    },
+                                    "status": {
+                                        "type": "string",
+                                        "enum": [
+                                            "backlog",
+                                            "in_progress",
+                                            "in_review",
+                                            "done",
+                                            "canceled"
+                                        ]
+                                    },
+                                    "priority": {
+                                        "type": "string",
+                                        "enum": [
+                                            "low",
+                                            "medium",
+                                            "high",
+                                            "urgent"
+                                        ]
+                                    },
+                                    "order_in_phase": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "assignee_id": {
+                                        "type": "integer"
+                                    },
+                                    "contractor_id": {
+                                        "type": "integer"
+                                    },
+                                    "is_blocked": {
+                                        "type": "boolean"
+                                    },
+                                    "blocked_reason": {
+                                        "type": "string"
+                                    },
+                                    "planned_start_at": {
+                                        "type": "string",
+                                        "format": "date"
+                                    },
+                                    "planned_end_at": {
+                                        "type": "string",
+                                        "format": "date"
+                                    },
+                                    "due_at": {
+                                        "type": "string",
+                                        "format": "date"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Tarefa criada com sucesso",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Sem permissão"
+                    },
+                    "422": {
+                        "description": "Erro de validação"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/tasks/{task}": {
+            "put": {
+                "tags": [
+                    "Tasks"
+                ],
+                "summary": "Atualizar tarefa",
+                "description": "Atualiza informações de uma tarefa existente",
+                "operationId": "7ca08fc4397f1b44d058d9a8571df4e3",
+                "parameters": [
+                    {
+                        "name": "X-Company-Id",
+                        "in": "header",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "task",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "phase_id": {
+                                        "type": "integer"
+                                    },
+                                    "title": {
+                                        "type": "string"
+                                    },
+                                    "description": {
+                                        "type": "string"
+                                    },
+                                    "status": {
+                                        "type": "string",
+                                        "enum": [
+                                            "backlog",
+                                            "in_progress",
+                                            "in_review",
+                                            "done",
+                                            "canceled"
+                                        ]
+                                    },
+                                    "priority": {
+                                        "type": "string",
+                                        "enum": [
+                                            "low",
+                                            "medium",
+                                            "high",
+                                            "urgent"
+                                        ]
+                                    },
+                                    "order_in_phase": {
+                                        "type": "integer"
+                                    },
+                                    "assignee_id": {
+                                        "type": "integer"
+                                    },
+                                    "contractor_id": {
+                                        "type": "integer"
+                                    },
+                                    "is_blocked": {
+                                        "type": "boolean"
+                                    },
+                                    "blocked_reason": {
+                                        "type": "string"
+                                    },
+                                    "planned_start_at": {
+                                        "type": "string",
+                                        "format": "date"
+                                    },
+                                    "planned_end_at": {
+                                        "type": "string",
+                                        "format": "date"
+                                    },
+                                    "due_at": {
+                                        "type": "string",
+                                        "format": "date"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Tarefa atualizada com sucesso",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Sem permissão"
+                    },
+                    "404": {
+                        "description": "Tarefa não encontrada"
+                    },
+                    "422": {
+                        "description": "Erro de validação"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Tasks"
+                ],
+                "summary": "Remover tarefa",
+                "description": "Remove uma tarefa (soft delete)",
+                "operationId": "c02800103c68f71d9c6e1646ac17ee8d",
+                "parameters": [
+                    {
+                        "name": "X-Company-Id",
+                        "in": "header",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "task",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Tarefa removida com sucesso"
+                    },
+                    "403": {
+                        "description": "Sem permissão"
+                    },
+                    "404": {
+                        "description": "Tarefa não encontrada"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/tasks/{task}/status": {
+            "patch": {
+                "tags": [
+                    "Tasks"
+                ],
+                "summary": "Atualizar status da tarefa",
+                "description": "Atualiza apenas o status da tarefa (atalho para drag-and-drop no Kanban)",
+                "operationId": "fa7333c0544a0bb2a20cd36700109d68",
+                "parameters": [
+                    {
+                        "name": "X-Company-Id",
+                        "in": "header",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "task",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "status"
+                                ],
+                                "properties": {
+                                    "status": {
+                                        "type": "string",
+                                        "enum": [
+                                            "backlog",
+                                            "in_progress",
+                                            "in_review",
+                                            "done",
+                                            "canceled"
+                                        ],
+                                        "example": "in_progress"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Status atualizado com sucesso",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Sem permissão"
+                    },
+                    "404": {
+                        "description": "Tarefa não encontrada"
+                    },
+                    "422": {
+                        "description": "Erro de validação"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
             }
         }
     },
@@ -1198,6 +2505,10 @@
     },
     "tags": [
         {
+            "name": "Admin",
+            "description": "Gerenciamento administrativo de roles e permissões"
+        },
+        {
             "name": "Companies",
             "description": "Gerenciamento de empresas"
         },
@@ -1208,6 +2519,10 @@
         {
             "name": "Documents",
             "description": "Gerenciamento de documentos do projeto"
+        },
+        {
+            "name": "Invites",
+            "description": "Gerenciamento de convites para empresas"
         },
         {
             "name": "Me",

@@ -49,7 +49,40 @@ class DocumentController extends Controller
     }
 
     /**
-     * Store a newly uploaded document.
+     * @OA\Post(
+     *     path="/api/v1/projects/{project}/documents",
+     *     summary="Upload de documento",
+     *     description="Faz upload de um documento para o projeto",
+     *     tags={"Documents"},
+     *     security={{"sanctum":{}}},
+     *     @OA\Parameter(name="X-Company-Id", in="header", required=true, @OA\Schema(type="integer")),
+     *     @OA\Parameter(name="project", in="path", required=true, @OA\Schema(type="integer")),
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\MediaType(
+     *             mediaType="multipart/form-data",
+     *             @OA\Schema(
+     *                 required={"file"},
+     *                 @OA\Property(
+     *                     property="file",
+     *                     type="string",
+     *                     format="binary",
+     *                     description="Arquivo a ser enviado (PDF, JPG, PNG, DOC, DOCX, XLS, XLSX - máx. 10MB)"
+     *                 ),
+     *                 @OA\Property(property="name", type="string", example="Planta Baixa")
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=201,
+     *         description="Documento enviado com sucesso",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="data", type="object")
+     *         )
+     *     ),
+     *     @OA\Response(response=403, description="Sem permissão"),
+     *     @OA\Response(response=422, description="Erro de validação")
+     * )
      */
     public function store(StoreDocumentRequest $request, Project $project): JsonResponse
     {
@@ -85,7 +118,21 @@ class DocumentController extends Controller
     }
 
     /**
-     * Remove the specified document (soft delete + delete file).
+     * @OA\Delete(
+     *     path="/api/v1/documents/{document}",
+     *     summary="Remover documento",
+     *     description="Remove um documento (soft delete) e exclui o arquivo do storage",
+     *     tags={"Documents"},
+     *     security={{"sanctum":{}}},
+     *     @OA\Parameter(name="X-Company-Id", in="header", required=true, @OA\Schema(type="integer")),
+     *     @OA\Parameter(name="document", in="path", required=true, @OA\Schema(type="integer")),
+     *     @OA\Response(
+     *         response=204,
+     *         description="Documento removido com sucesso"
+     *     ),
+     *     @OA\Response(response=403, description="Sem permissão"),
+     *     @OA\Response(response=404, description="Documento não encontrado")
+     * )
      */
     public function destroy(Request $request, Document $document): JsonResponse
     {

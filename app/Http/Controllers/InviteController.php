@@ -10,8 +10,53 @@ use Illuminate\Support\Str;
 use Spatie\Permission\PermissionRegistrar;
 use Spatie\Permission\Models\Role;
 
+/**
+ * @OA\Tag(
+ *     name="Invites",
+ *     description="Gerenciamento de convites para empresas"
+ * )
+ */
 class InviteController extends Controller
 {
+    /**
+     * @OA\Post(
+     *     path="/api/v1/companies/{company}/invites",
+     *     summary="Criar convite",
+     *     description="Cria um convite para adicionar um usuário à empresa",
+     *     tags={"Invites"},
+     *     security={{"sanctum":{}}},
+     *     @OA\Parameter(
+     *         name="X-Company-Id",
+     *         in="header",
+     *         required=true,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Parameter(
+     *         name="company",
+     *         in="path",
+     *         required=true,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"email"},
+     *             @OA\Property(property="email", type="string", format="email", example="usuario@example.com"),
+     *             @OA\Property(property="role_name", type="string", example="Admin Obra")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=201,
+     *         description="Convite criado com sucesso",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="token", type="string", example="abc123def456...")
+     *         )
+     *     ),
+     *     @OA\Response(response=403, description="Sem permissão"),
+     *     @OA\Response(response=404, description="Empresa não encontrada"),
+     *     @OA\Response(response=422, description="Erro de validação")
+     * )
+     */
     public function create(Request $request, Company $company): JsonResponse
     {
         $validated = $request->validate([
@@ -32,6 +77,30 @@ class InviteController extends Controller
         return response()->json(['token' => $invite->token], 201);
     }
 
+    /**
+     * @OA\Post(
+     *     path="/api/v1/invites/{token}/accept",
+     *     summary="Aceitar convite",
+     *     description="Aceita um convite para ingressar em uma empresa",
+     *     tags={"Invites"},
+     *     security={{"sanctum":{}}},
+     *     @OA\Parameter(
+     *         name="token",
+     *         in="path",
+     *         required=true,
+     *         @OA\Schema(type="string"),
+     *         description="Token do convite"
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Convite aceito com sucesso",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Invite accepted")
+     *         )
+     *     ),
+     *     @OA\Response(response=404, description="Convite não encontrado ou expirado")
+     * )
+     */
     public function accept(Request $request, string $token): JsonResponse
     {
         /** @var \App\Models\User $user */

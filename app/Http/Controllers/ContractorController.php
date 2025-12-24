@@ -120,7 +120,43 @@ class ContractorController extends Controller
     }
 
     /**
-     * Update the specified contractor.
+     * @OA\Put(
+     *     path="/api/v1/contractors/{contractor}",
+     *     summary="Atualizar empreiteiro",
+     *     description="Atualiza informações de um empreiteiro existente",
+     *     tags={"Contractors"},
+     *     security={{"sanctum":{}}},
+     *     @OA\Parameter(
+     *         name="X-Company-Id",
+     *         in="header",
+     *         required=true,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Parameter(
+     *         name="contractor",
+     *         in="path",
+     *         required=true,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             @OA\Property(property="name", type="string", example="Construtora ABC"),
+     *             @OA\Property(property="contact", type="string", example="(11) 98765-4321"),
+     *             @OA\Property(property="specialties", type="string", example="Fundação, Estrutura")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Empreiteiro atualizado com sucesso",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="data", type="object")
+     *         )
+     *     ),
+     *     @OA\Response(response=403, description="Sem permissão"),
+     *     @OA\Response(response=404, description="Empreiteiro não encontrado"),
+     *     @OA\Response(response=422, description="Erro de validação")
+     * )
      */
     public function update(UpdateContractorRequest $request, Contractor $contractor): JsonResponse
     {
@@ -138,7 +174,31 @@ class ContractorController extends Controller
     }
 
     /**
-     * Remove the specified contractor (soft delete).
+     * @OA\Delete(
+     *     path="/api/v1/contractors/{contractor}",
+     *     summary="Remover empreiteiro",
+     *     description="Remove um empreiteiro (soft delete)",
+     *     tags={"Contractors"},
+     *     security={{"sanctum":{}}},
+     *     @OA\Parameter(
+     *         name="X-Company-Id",
+     *         in="header",
+     *         required=true,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Parameter(
+     *         name="contractor",
+     *         in="path",
+     *         required=true,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Response(
+     *         response=204,
+     *         description="Empreiteiro removido com sucesso"
+     *     ),
+     *     @OA\Response(response=403, description="Sem permissão"),
+     *     @OA\Response(response=404, description="Empreiteiro não encontrado")
+     * )
      */
     public function destroy(Request $request, Contractor $contractor): JsonResponse
     {
