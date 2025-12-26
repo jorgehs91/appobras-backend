@@ -77,6 +77,8 @@ Route::prefix('v1')->group(function (): void {
             // Documents (escopo project)
             Route::get('/projects/{project}/documents', [DocumentController::class, 'index']);
             Route::post('/projects/{project}/documents', [DocumentController::class, 'store']);
+            Route::get('/documents/{document}', [DocumentController::class, 'show']);
+            Route::get('/documents/{document}/download', [DocumentController::class, 'download']);
             Route::delete('/documents/{document}', [DocumentController::class, 'destroy']);
 
             // Progress & Stats

@@ -679,4 +679,3 @@ Após implementar, testar com frontend:
 ## Notas Técnicas
 
 - **Performance:** Usar eager loading (`with()`) para evitar N+1 em lists
-- **Cache:** Considerar cache de `progress_percent` se queries ficarem lentas (invalidar ao mudar task/phase)

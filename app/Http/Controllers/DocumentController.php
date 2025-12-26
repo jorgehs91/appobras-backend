@@ -8,6 +8,7 @@ use App\Models\Document;
 use App\Models\Project;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Storage;
 
 /**
@@ -115,6 +116,79 @@ class DocumentController extends Controller
         ]);
 
         return (new DocumentResource($document->load('uploader')))->response()->setStatusCode(201);
+    }
+
+    /**
+     * @OA\Get(
+     *     path="/api/v1/documents/{document}",
+     *     summary="Obter documento específico",
+     *     description="Retorna um documento específico por ID. O usuário deve ter permissão para visualizar documentos do projeto.",
+     *     tags={"Documents"},
+     *     security={{"sanctum":{}}},
+     *     @OA\Parameter(name="X-Company-Id", in="header", required=true, @OA\Schema(type="integer")),
+     *     @OA\Parameter(name="document", in="path", required=true, @OA\Schema(type="integer")),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Documento encontrado",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="data", type="object")
+     *         )
+     *     ),
+     *     @OA\Response(response=403, description="Sem permissão"),
+     *     @OA\Response(response=404, description="Documento não encontrado")
+     * )
+     */
+    public function show(Request $request, Document $document): JsonResponse
+    {
+        /** @var \App\Models\User $user */
+        $user = $request->user();
+        $companyId = (int) $request->header('X-Company-Id');
+
+        abort_unless($companyId && $user->companies()->whereKey($companyId)->exists(), 403);
+        abort_unless($document->company_id === $companyId, 403);
+        abort_unless($user->projects()->whereKey($document->project_id)->exists(), 403);
+
+        $document->load('uploader');
+
+        return (new DocumentResource($document))->response();
+    }
+
+    /**
+     * @OA\Get(
+     *     path="/api/v1/documents/{document}/download",
+     *     summary="Baixar arquivo do documento",
+     *     description="Retorna o arquivo físico do documento para download. O usuário deve ter permissão para visualizar documentos do projeto.",
+     *     tags={"Documents"},
+     *     security={{"sanctum":{}}},
+     *     @OA\Parameter(name="X-Company-Id", in="header", required=true, @OA\Schema(type="integer")),
+     *     @OA\Parameter(name="document", in="path", required=true, @OA\Schema(type="integer")),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Arquivo do documento",
+     *         @OA\MediaType(
+     *             mediaType="application/octet-stream",
+     *             @OA\Schema(type="string", format="binary")
+     *         )
+     *     ),
+     *     @OA\Response(response=403, description="Sem permissão"),
+     *     @OA\Response(response=404, description="Documento não encontrado")
+     * )
+     */
+    public function download(Request $request, Document $document): \Symfony\Component\HttpFoundation\StreamedResponse
+    {
+        /** @var \App\Models\User $user */
+        $user = $request->user();
+        $companyId = (int) $request->header('X-Company-Id');
+
+        abort_unless($companyId && $user->companies()->whereKey($companyId)->exists(), 403);
+        abort_unless($document->company_id === $companyId, 403);
+        abort_unless($user->projects()->whereKey($document->project_id)->exists(), 403);
+
+        abort_unless(Storage::exists($document->file_path), 404, 'Arquivo não encontrado no storage');
+
+        return Storage::response($document->file_path, $document->name, [
+            'Content-Type' => $document->mime_type,
+        ]);
     }
 
     /**
