@@ -1070,6 +1070,60 @@
             }
         },
         "/api/v1/documents/{document}": {
+            "get": {
+                "tags": [
+                    "Documents"
+                ],
+                "summary": "Obter documento específico",
+                "description": "Retorna um documento específico por ID. O usuário deve ter permissão para visualizar documentos do projeto.",
+                "operationId": "0a86888d32d9a9165059255e7a8b70d3",
+                "parameters": [
+                    {
+                        "name": "X-Company-Id",
+                        "in": "header",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "document",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Documento encontrado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Sem permissão"
+                    },
+                    "404": {
+                        "description": "Documento não encontrado"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
             "delete": {
                 "tags": [
                     "Documents"
@@ -1098,6 +1152,58 @@
                 "responses": {
                     "204": {
                         "description": "Documento removido com sucesso"
+                    },
+                    "403": {
+                        "description": "Sem permissão"
+                    },
+                    "404": {
+                        "description": "Documento não encontrado"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/documents/{document}/download": {
+            "get": {
+                "tags": [
+                    "Documents"
+                ],
+                "summary": "Baixar arquivo do documento",
+                "description": "Retorna o arquivo físico do documento para download. O usuário deve ter permissão para visualizar documentos do projeto.",
+                "operationId": "a43a75f4c96bcb4a60a1189527190391",
+                "parameters": [
+                    {
+                        "name": "X-Company-Id",
+                        "in": "header",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "document",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Arquivo do documento",
+                        "content": {
+                            "application/octet-stream": {
+                                "schema": {
+                                    "type": "string",
+                                    "format": "binary"
+                                }
+                            }
+                        }
                     },
                     "403": {
                         "description": "Sem permissão"
