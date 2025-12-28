@@ -19,6 +19,7 @@ class AuthServiceProvider extends ServiceProvider
         \App\Models\Task::class => \App\Policies\TaskPolicy::class,
         \App\Models\Contractor::class => \App\Policies\ContractorPolicy::class,
         \App\Models\Document::class => \App\Policies\DocumentPolicy::class,
+        \App\Models\Project::class => \App\Policies\ProjectMemberPolicy::class,
     ];
 
     public function boot(): void

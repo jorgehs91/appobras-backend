@@ -10,6 +10,7 @@ use App\Http\Controllers\InviteController;
 use App\Http\Controllers\MeController;
 use App\Http\Controllers\PhaseController;
 use App\Http\Controllers\ProjectController;
+use App\Http\Controllers\ProjectMembersController;
 use App\Http\Controllers\ProjectProgressController;
 use App\Http\Controllers\TaskController;
 use Illuminate\Support\Facades\Route;
@@ -35,6 +36,7 @@ Route::prefix('v1')->group(function (): void {
         // Invites
         Route::post('/companies/{company}/invites', [InviteController::class, 'create'])->middleware(['company', 'permission:users.update,sanctum']);
         Route::post('/invites/{token}/accept', [InviteController::class, 'accept']);
+        Route::post('/invites/project/{token}/accept', [InviteController::class, 'acceptProjectInvite']);
 
         // Me
         Route::post('/me/switch-company', [MeController::class, 'switchCompany']);
@@ -80,6 +82,12 @@ Route::prefix('v1')->group(function (): void {
             Route::get('/documents/{document}', [DocumentController::class, 'show']);
             Route::get('/documents/{document}/download', [DocumentController::class, 'download']);
             Route::delete('/documents/{document}', [DocumentController::class, 'destroy']);
+
+            // Project Members (escopo project)
+            Route::get('/projects/{project}/members', [ProjectMembersController::class, 'index']);
+            Route::post('/projects/{project}/members', [ProjectMembersController::class, 'store']);
+            Route::patch('/projects/{project}/members/{userId}', [ProjectMembersController::class, 'update']);
+            Route::delete('/projects/{project}/members/{userId}', [ProjectMembersController::class, 'destroy']);
 
             // Progress & Stats
             Route::get('/projects/{project}/progress', [ProjectProgressController::class, 'show']);
