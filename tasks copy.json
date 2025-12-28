@@ -1,0 +1,271 @@
+
+{
+    "tasks": [
+        {
+            "id": "auth-permissions",
+            "name": "Autenticação, Usuários e Permissões",
+            "description": "Controle de acesso, multi-empresa, perfis.",
+            "status": "DONE",
+            "subtasks": [
+                {
+                    "id": "auth-endpoints",
+                    "name": "Endpoints de autenticação",
+                    "description": "Endpoints para login/logout, refresh, registro/convite, recuperação de senha.",
+                    "status": "DONE"
+                },
+                {
+                    "id": "auth-rbac",
+                    "name": "RBAC com Spatie Permission",
+                    "description": "Roles: Admin da Obra, Engenheiro, Financeiro, Compras, Prestador, Leitor.",
+                    "status": "DONE"
+                },
+                {
+                    "id": "auth-tenancy",
+                    "name": "Tenancy simples por 'empresa/cliente'",
+                    "description": "Campo company_id nas entidades ou Workspace.",
+                    "status": "DONE"
+                },
+                {
+                    "id": "auth-audit",
+                    "name": "Auditoria e trilhas básicas",
+                    "description": "Model events e created_by/updated_by.",
+                    "status": "TODO"
+                },
+                {
+                    "id": "auth-advanced",
+                    "name": "Funcionalidades avançadas de autenticação",
+                    "description": "MFA (TOTP), SSO (OAuth/SAML), políticas avançadas.",
+                    "status": "TODO"
+                }
+            ]
+        },
+        {
+            "id": "projects",
+            "name": "Obras e Projetos",
+            "description": "Cadastro de obras/projetos, equipes, meta-dados.",
+            "status": "DONE",
+            "subtasks": [
+                {
+                    "id": "projects-entities",
+                    "name": "Entidades de Projeto",
+                    "description": "Project(Obra), Site/Local, Stakeholders, Team, vinculação de usuários/contratados.",
+                    "status": "DONE"
+                },
+                {
+                    "id": "projects-endpoints",
+                    "name": "Endpoints CRUD de Projetos",
+                    "description": "CRUD, filtros, paginação, policies.",
+                    "status": "DONE"
+                },
+                {
+                    "id": "projects-webhooks",
+                    "name": "Webhooks internos/domínio",
+                    "description": "Ex: ProjectCreated -> notificação.",
+                    "status": "TODO"
+                },
+                {
+                    "id": "projects-templates",
+                    "name": "Templates de obras",
+                    "description": "Clonagem, importação CSV.",
+                    "status": "TODO"
+                }
+            ]
+        },
+        {
+            "id": "phases-schedule",
+            "name": "Fases, Cronogramas e WBS (Gantt/Kanban)",
+            "description": "Modelar fases, tarefas, dependências, status e visualizações.",
+            "status": "DONE",
+            "subtasks": [
+                {
+                    "id": "phases-entities",
+                    "name": "Entidades de Fases e Tarefas",
+                    "description": "Phase, Task, Dependencies, Assignees, Checklist.",
+                    "status": "DONE"
+                },
+                {
+                    "id": "phases-endpoints",
+                    "name": "Endpoints CRUD de Fases e Tarefas",
+                    "description": "CRUD, bulk updates, cálculo de progresso.",
+                    "status": "DONE"
+                },
+                {
+                    "id": "phases-validation",
+                    "name": "Validações de dependências e datas",
+                    "description": "Eventos (atraso/adiantamento).",
+                    "status": "TODO"
+                },
+                {
+                    "id": "phases-baseline",
+                    "name": "Linha de base (baseline)",
+                    "description": "Versão de cronograma.",
+                    "status": "TODO"
+                }
+            ]
+        },
+        {
+            "id": "alerts-notifications",
+            "name": "Alertas e Notificações",
+            "description": "Alertas para prazos e entregas, eventos críticos.",
+            "status": "TODO",
+            "subtasks": [
+                {
+                    "id": "alerts-jobs",
+                    "name": "Jobs agendados para verificação de SLAs/prazos",
+                    "description": "Scheduler para verificar SLAs.",
+                    "status": "TODO"
+                },
+                {
+                    "id": "alerts-channels",
+                    "name": "Canais de notificação",
+                    "description": "Canal e-mail; preferências por usuário/obra. SMS/WhatsApp push, templates multi-idioma, digest diário/semanal.",
+                    "status": "TODO"
+                }
+            ]
+        },
+        {
+            "id": "financial",
+            "name": "Gestão Financeira",
+            "description": "Orçamento, custos previstos x realizados, compras/pedidos, relatórios.",
+            "status": "TODO",
+            "subtasks": [
+                {
+                    "id": "financial-entities",
+                    "name": "Entidades Financeiras",
+                    "description": "Budget, CostItem, PurchaseRequest, PurchaseOrder, Expense/Invoice, Supplier.",
+                    "status": "TODO"
+                },
+                {
+                    "id": "financial-rules",
+                    "name": "Regras de negócio financeiras",
+                    "description": "Estados (rascunho, aprovado, cancelado), aprovações por papel.",
+                    "status": "TODO"
+                },
+                {
+                    "id": "financial-calculations",
+                    "name": "Cálculo PVxRV",
+                    "description": "Previsto vs realizado, centros de custo por obra.",
+                    "status": "TODO"
+                },
+                {
+                    "id": "financial-integration",
+                    "name": "Integração ERP",
+                    "description": "Export contábil, impostos/retenções, multi-moeda.",
+                    "status": "TODO"
+                }
+            ]
+        },
+        {
+            "id": "contractors-payments",
+            "name": "Prestadores de Serviço e Pagamentos",
+            "description": "Cadastro de contratados, contratos, pagamentos.",
+            "status": "DONE",
+            "subtasks": [
+                {
+                    "id": "contractors-entities",
+                    "name": "Entidades de Prestadores",
+                    "description": "Contractor, Contract, Payment, WorkOrder.",
+                    "status": "DONE"
+                },
+                {
+                    "id": "contractors-flows",
+                    "name": "Fluxos de trabalho com prestadores",
+                    "description": "Cadastro/qualificação, vínculo a obra/tarefa, pagamentos programados.",
+                    "status": "TODO"
+                },
+                {
+                    "id": "contractors-integration",
+                    "name": "Integração bancária",
+                    "description": "CNAB/Pix, retenções (INSS/ISS).",
+                    "status": "TODO"
+                }
+            ]
+        },
+        {
+            "id": "documentation-compliance",
+            "name": "Documentação e Compliance",
+            "description": "Armazenamento de contratos, plantas, normas; permissões e aprovações; licenças.",
+            "status": "DONE",
+            "subtasks": [
+                {
+                    "id": "docs-entities",
+                    "name": "Entidades de Documentação",
+                    "description": "Document, Folder, Tag, Version, Approval, License.",
+                    "status": "DONE"
+                },
+                {
+                    "id": "docs-upload",
+                    "name": "Upload e versionamento",
+                    "description": "Upload S3, versionamento, trilha de aprovações, permissões por pasta/obra.",
+                    "status": "TODO"
+                },
+                {
+                    "id": "docs-signature",
+                    "name": "Assinatura digital",
+                    "description": "ICP-Brasil/Adobe Sign, OCR e busca semântica.",
+                    "status": "TODO"
+                }
+            ]
+        },
+        {
+            "id": "dashboards-reports",
+            "name": "Painéis, Relatórios e KPIs",
+            "description": "Indicadores operacionais, técnicos e financeiros.",
+            "status": "DONE",
+            "subtasks": [
+                {
+                    "id": "dashboards-endpoints",
+                    "name": "Endpoints agregados",
+                    "description": "Progresso por obra, tarefas atrasadas, PVxRV, próximos vencimentos.",
+                    "status": "DONE"
+                },
+                {
+                    "id": "dashboards-etl",
+                    "name": "ETL para Data Mart",
+                    "description": "Pré-cálculo noturno.",
+                    "status": "TODO"
+                }
+            ]
+        },
+        {
+            "id": "communication",
+            "name": "Comunicação (E-mail, WhatsApp, SMS)",
+            "description": "Centralizar comunicação operacional.",
+            "status": "TODO",
+            "subtasks": [
+                {
+                    "id": "communication-email",
+                    "name": "E-mail transacional",
+                    "description": "SendGrid/SES, templates blade/markdown.",
+                    "status": "TODO"
+                },
+                {
+                    "id": "communication-whatsapp-sms",
+                    "name": "WhatsApp e SMS",
+                    "description": "WhatsApp Business (Meta Cloud API), SMS (Twilio/Zenvia).",
+                    "status": "TODO"
+                }
+            ]
+        },
+        {
+            "id": "settings-audit-admin",
+            "name": "Configurações, Auditoria e Administração",
+            "description": "Configurações, logs e administração geral.",
+            "status": "TODO",
+            "subtasks": [
+                {
+                    "id": "settings-config",
+                    "name": "Configurações por obra/empresa",
+                    "description": "Fuso horário, moeda, numeração.",
+                    "status": "TODO"
+                },
+                {
+                    "id": "settings-audit-log",
+                    "name": "Audit log",
+                    "description": "Model changes, key actions.",
+                    "status": "TODO"
+                }
+            ]
+        }
+    ]
+}

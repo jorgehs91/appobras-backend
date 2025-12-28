@@ -4,13 +4,14 @@ namespace App\Models;
 
 use App\Enums\TaskPriority;
 use App\Enums\TaskStatus;
+use App\Traits\AuditTrait;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Task extends Model
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory, SoftDeletes, AuditTrait;
 
     /**
      * @var list<string>
@@ -33,6 +34,8 @@ class Task extends Model
         'due_at',
         'started_at',
         'completed_at',
+        'created_by',
+        'updated_by',
     ];
 
     /**
@@ -90,6 +93,22 @@ class Task extends Model
     public function contractor()
     {
         return $this->belongsTo(Contractor::class);
+    }
+
+    /**
+     * Get the user who created the task.
+     */
+    public function creator()
+    {
+        return $this->belongsTo(User::class, 'created_by');
+    }
+
+    /**
+     * Get the user who last updated the task.
+     */
+    public function updater()
+    {
+        return $this->belongsTo(User::class, 'updated_by');
     }
 
     /**

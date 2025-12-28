@@ -3,13 +3,14 @@
 namespace App\Models;
 
 use App\Enums\PhaseStatus;
+use App\Traits\AuditTrait;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Phase extends Model
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory, SoftDeletes, AuditTrait;
 
     /**
      * @var list<string>
@@ -26,6 +27,8 @@ class Phase extends Model
         'planned_end_at',
         'actual_start_at',
         'actual_end_at',
+        'created_by',
+        'updated_by',
     ];
 
     /**
@@ -56,6 +59,22 @@ class Phase extends Model
     public function project()
     {
         return $this->belongsTo(Project::class);
+    }
+
+    /**
+     * Get the user who created the phase.
+     */
+    public function creator()
+    {
+        return $this->belongsTo(User::class, 'created_by');
+    }
+
+    /**
+     * Get the user who last updated the phase.
+     */
+    public function updater()
+    {
+        return $this->belongsTo(User::class, 'updated_by');
     }
 
     /**

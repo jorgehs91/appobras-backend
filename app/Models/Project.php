@@ -3,12 +3,13 @@
 namespace App\Models;
 
 use App\Enums\ProjectStatus;
+use App\Traits\AuditTrait;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Project extends Model
 {
-    use HasFactory;
+    use HasFactory, AuditTrait;
 
     /**
      * @var list<string>
@@ -26,11 +27,29 @@ class Project extends Model
         'planned_budget_amount',
         'manager_user_id',
         'address',
+        'created_by',
+        'updated_by',
     ];
 
     public function company()
     {
         return $this->belongsTo(Company::class);
+    }
+
+    /**
+     * Get the user who created the project.
+     */
+    public function creator()
+    {
+        return $this->belongsTo(User::class, 'created_by');
+    }
+
+    /**
+     * Get the user who last updated the project.
+     */
+    public function updater()
+    {
+        return $this->belongsTo(User::class, 'updated_by');
     }
 
     /**
