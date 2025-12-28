@@ -13,6 +13,7 @@ use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\ProjectMembersController;
 use App\Http\Controllers\ProjectProgressController;
 use App\Http\Controllers\TaskController;
+use App\Http\Controllers\TaskDependencyController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('v1')->group(function (): void {
@@ -75,6 +76,12 @@ Route::prefix('v1')->group(function (): void {
             Route::put('/tasks/{task}', [TaskController::class, 'update']);
             Route::patch('/tasks/{task}/status', [TaskController::class, 'updateStatus']);
             Route::delete('/tasks/{task}', [TaskController::class, 'destroy']);
+
+            // Task Dependencies (escopo project)
+            Route::post('/projects/{project}/task-dependencies', [TaskDependencyController::class, 'store']);
+            Route::post('/projects/{project}/task-dependencies/bulk', [TaskDependencyController::class, 'storeBulk']);
+            Route::put('/task-dependencies/{taskDependency}', [TaskDependencyController::class, 'update']);
+            Route::delete('/task-dependencies/{taskDependency}', [TaskDependencyController::class, 'destroy']);
 
             // Documents (escopo project)
             Route::get('/projects/{project}/documents', [DocumentController::class, 'index']);
