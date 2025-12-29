@@ -106,6 +106,14 @@ class Project extends Model
     }
 
     /**
+     * Get the budget for the project.
+     */
+    public function budget()
+    {
+        return $this->hasOne(Budget::class);
+    }
+
+    /**
      * Calculate progress percentage based on active phases.
      * Returns average of phase progress (only active phases).
      */
