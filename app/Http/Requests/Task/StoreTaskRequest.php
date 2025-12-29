@@ -27,7 +27,7 @@ class StoreTaskRequest extends FormRequest
             'description' => ['nullable', 'string'],
             'status' => ['nullable', 'in:backlog,in_progress,in_review,done,canceled'],
             'priority' => ['nullable', 'in:low,medium,high,urgent'],
-            'order_in_phase' => ['nullable', 'integer', 'min:0'],
+            'order_in_phase' => ['nullable', 'numeric', 'min:0'],
             'assignee_id' => ['nullable', 'exists:users,id'],
             'contractor_id' => ['nullable', 'exists:contractors,id'],
             'is_blocked' => ['nullable', 'boolean'],

@@ -73,6 +73,7 @@ Route::prefix('v1')->group(function (): void {
             // Tasks (escopo project)
             Route::get('/projects/{project}/tasks', [TaskController::class, 'index']);
             Route::post('/projects/{project}/tasks', [TaskController::class, 'store']);
+            Route::patch('/projects/{project}/tasks/bulk', [TaskController::class, 'bulkUpdate']);
             Route::put('/tasks/{task}', [TaskController::class, 'update']);
             Route::patch('/tasks/{task}/status', [TaskController::class, 'updateStatus']);
             Route::delete('/tasks/{task}', [TaskController::class, 'destroy']);

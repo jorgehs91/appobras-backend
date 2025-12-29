@@ -27,7 +27,7 @@ class UpdateTaskRequest extends FormRequest
             'description' => ['nullable', 'string'],
             'status' => ['sometimes', 'in:backlog,in_progress,in_review,done,canceled'],
             'priority' => ['nullable', 'in:low,medium,high,urgent'],
-            'order_in_phase' => ['sometimes', 'integer', 'min:0'],
+            'order_in_phase' => ['sometimes', 'numeric', 'min:0'],
             'assignee_id' => ['nullable', 'exists:users,id'],
             'contractor_id' => ['nullable', 'exists:contractors,id'],
             'is_blocked' => ['sometimes', 'boolean'],

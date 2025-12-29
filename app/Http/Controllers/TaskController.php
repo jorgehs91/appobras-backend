@@ -2,12 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\Task\BulkUpdateTaskRequest;
 use App\Http\Requests\Task\StoreTaskRequest;
 use App\Http\Requests\Task\UpdateTaskRequest;
 use App\Http\Requests\Task\UpdateTaskStatusRequest;
 use App\Http\Resources\TaskResource;
 use App\Models\Project;
 use App\Models\Task;
+use App\Services\TaskBulkService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -19,6 +21,10 @@ use Illuminate\Http\Request;
  */
 class TaskController extends Controller
 {
+    public function __construct(
+        protected TaskBulkService $bulkService
+    ) {
+    }
     /**
      * @OA\Get(
      *     path="/api/v1/projects/{project}/tasks",
@@ -180,6 +186,71 @@ class TaskController extends Controller
         $task->save();
 
         return (new TaskResource($task->load(['phase', 'assignee', 'contractor'])))->response();
+    }
+
+    /**
+     * @OA\Patch(
+     *     path="/api/v1/projects/{project}/tasks/bulk",
+     *     summary="Atualizar múltiplas tarefas",
+     *     description="Atualiza múltiplas tarefas em uma única operação atômica. Permite atualizar posição (reorder), status e outros campos. Usa transações para garantir atomicidade.",
+     *     tags={"Tasks"},
+     *     security={{"sanctum":{}}},
+     *     @OA\Parameter(name="X-Company-Id", in="header", required=true, @OA\Schema(type="integer")),
+     *     @OA\Parameter(name="project", in="path", required=true, @OA\Schema(type="integer")),
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"tasks"},
+     *             @OA\Property(
+     *                 property="tasks",
+     *                 type="array",
+     *                 @OA\Items(
+     *                     type="object",
+     *                     required={"id"},
+     *                     @OA\Property(property="id", type="integer", example=1, description="ID da tarefa a ser atualizada"),
+     *                     @OA\Property(property="position", type="number", format="float", example=1.1, description="Nova posição da tarefa (para reordenação no Kanban). Permite valores decimais como 1.1, 1.2, etc."),
+     *                     @OA\Property(property="status", type="string", enum={"backlog", "in_progress", "in_review", "done", "canceled"}, example="in_progress"),
+     *                     @OA\Property(property="phase_id", type="integer", example=2),
+     *                     @OA\Property(property="priority", type="string", enum={"low", "medium", "high", "urgent"}),
+     *                     @OA\Property(property="assignee_id", type="integer", example=5),
+     *                     @OA\Property(property="contractor_id", type="integer", example=3),
+     *                     @OA\Property(property="is_blocked", type="boolean", example=false),
+     *                     @OA\Property(property="blocked_reason", type="string", example="Aguardando material")
+     *                 )
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Tarefas atualizadas com sucesso",
+     *         @OA\JsonContent(
+     *             @OA\Property(
+     *                 property="data",
+     *                 type="array",
+     *                 @OA\Items(type="object")
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(response=403, description="Sem permissão"),
+     *     @OA\Response(response=422, description="Erro de validação (tarefa não encontrada, não pertence ao projeto, etc)")
+     * )
+     */
+    public function bulkUpdate(BulkUpdateTaskRequest $request, Project $project): JsonResponse
+    {
+        /** @var \App\Models\User $user */
+        $user = $request->user();
+        $companyId = (int) $request->header('X-Company-Id');
+
+        abort_unless($companyId && $user->companies()->whereKey($companyId)->exists(), 403);
+        abort_unless($project->company_id === $companyId, 403);
+        abort_unless($user->projects()->whereKey($project->id)->exists(), 403);
+
+        $validated = $request->validated();
+        $tasksData = $validated['tasks'];
+
+        $updatedTasks = $this->bulkService->bulkUpdate($tasksData, $project);
+
+        return TaskResource::collection($updatedTasks)->response();
     }
 
     /**
