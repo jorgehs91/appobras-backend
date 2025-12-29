@@ -113,6 +113,48 @@ class MeController extends Controller
 
         return response()->json(['message' => 'Project switched'], 200);
     }
+
+    /**
+     * @OA\Put(
+     *     path="/api/v1/user/preferences",
+     *     summary="Atualizar preferências do usuário",
+     *     description="Atualiza as preferências de notificação por email do usuário autenticado",
+     *     tags={"Me"},
+     *     security={{"sanctum":{}}},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             @OA\Property(property="email_notifications_enabled", type="boolean", example=true, description="Habilitar ou desabilitar notificações por email")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Preferências atualizadas com sucesso",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="data", ref="#/components/schemas/UserResource")
+     *         )
+     *     ),
+     *     @OA\Response(response=422, description="Erro de validação")
+     * )
+     */
+    public function updatePreferences(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'email_notifications_enabled' => ['sometimes', 'boolean'],
+        ]);
+
+        /** @var \App\Models\User $user */
+        $user = $request->user();
+
+        if (isset($validated['email_notifications_enabled'])) {
+            $user->email_notifications_enabled = $validated['email_notifications_enabled'];
+            $user->save();
+        }
+
+        return response()->json([
+            'data' => new \App\Http\Resources\UserResource($user),
+        ], 200);
+    }
 }
 
 

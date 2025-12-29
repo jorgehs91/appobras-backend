@@ -2,12 +2,14 @@
 
 namespace App\Jobs;
 
+use App\Mail\AlertMailable;
 use App\Models\Notification;
 use App\Models\Task;
 use App\Models\User;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Mail;
 
 class SendAlertJob implements ShouldQueue
 {
@@ -75,6 +77,29 @@ class SendAlertJob implements ShouldQueue
                 ],
                 'channels' => ['database'],
             ]);
+        }
+
+        // Send email alerts if user has email notifications enabled
+        if ($user->email_notifications_enabled ?? true) {
+            // Send email for overdue tasks
+            if ($this->overdueTasks->isNotEmpty()) {
+                Mail::to($user)->queue(new AlertMailable(
+                    $user,
+                    $this->overdueTasks,
+                    collect(),
+                    'overdue'
+                ));
+            }
+
+            // Send email for near-due tasks
+            if ($this->nearDueTasks->isNotEmpty()) {
+                Mail::to($user)->queue(new AlertMailable(
+                    $user,
+                    collect(),
+                    $this->nearDueTasks,
+                    'near_due'
+                ));
+            }
         }
 
         // TODO: Create notifications for expiring licenses when License model is available

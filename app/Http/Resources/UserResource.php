@@ -23,6 +23,7 @@ class UserResource extends JsonResource
             'email' => $this->email,
             'email_verified_at' => $this->email_verified_at,
             'last_login_at' => $this->last_login_at,
+            'email_notifications_enabled' => $this->email_notifications_enabled ?? true,
         ];
     }
 }

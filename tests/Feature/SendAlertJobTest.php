@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Enums\TaskStatus;
 use App\Jobs\SendAlertJob;
+use App\Mail\AlertMailable;
 use App\Models\Company;
 use App\Models\Notification;
 use App\Models\Project;
@@ -12,6 +13,7 @@ use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Mail;
 use Tests\TestCase;
 
 class SendAlertJobTest extends TestCase
@@ -226,6 +228,144 @@ class SendAlertJobTest extends TestCase
         $this->assertEquals($project->id, $notification->data['project_id']);
         $this->assertEquals($project->name, $notification->data['project_name']);
         $this->assertEquals($task->due_at->toDateString(), $notification->data['due_at']);
+    }
+
+    public function test_job_sends_email_when_user_has_email_notifications_enabled(): void
+    {
+        Mail::fake();
+
+        $user = User::factory()->create(['email_notifications_enabled' => true]);
+        $company = Company::factory()->create();
+        $user->companies()->attach($company->id);
+        $project = Project::factory()->create(['company_id' => $company->id]);
+
+        $overdueTask = Task::factory()->create([
+            'company_id' => $company->id,
+            'project_id' => $project->id,
+            'assignee_id' => $user->id,
+            'due_at' => Carbon::now()->subDays(5),
+            'status' => TaskStatus::in_progress,
+        ]);
+
+        $job = new SendAlertJob(
+            $user->id,
+            collect([$overdueTask]),
+            collect([]),
+            []
+        );
+
+        $job->handle();
+
+        Mail::assertQueued(AlertMailable::class, function ($mail) use ($user, $overdueTask) {
+            return $mail->user->id === $user->id
+                && $mail->alertType === 'overdue'
+                && $mail->overdueTasks->contains($overdueTask);
+        });
+    }
+
+    public function test_job_sends_email_for_near_due_tasks(): void
+    {
+        Mail::fake();
+
+        $user = User::factory()->create(['email_notifications_enabled' => true]);
+        $company = Company::factory()->create();
+        $user->companies()->attach($company->id);
+        $project = Project::factory()->create(['company_id' => $company->id]);
+
+        $nearDueTask = Task::factory()->create([
+            'company_id' => $company->id,
+            'project_id' => $project->id,
+            'assignee_id' => $user->id,
+            'due_at' => Carbon::now()->addDays(2),
+            'status' => TaskStatus::in_progress,
+        ]);
+
+        $job = new SendAlertJob(
+            $user->id,
+            collect([]),
+            collect([$nearDueTask]),
+            []
+        );
+
+        $job->handle();
+
+        Mail::assertQueued(AlertMailable::class, function ($mail) use ($user, $nearDueTask) {
+            return $mail->user->id === $user->id
+                && $mail->alertType === 'near_due'
+                && $mail->nearDueTasks->contains($nearDueTask);
+        });
+    }
+
+    public function test_job_does_not_send_email_when_user_has_email_notifications_disabled(): void
+    {
+        Mail::fake();
+
+        $user = User::factory()->create(['email_notifications_enabled' => false]);
+        $company = Company::factory()->create();
+        $user->companies()->attach($company->id);
+        $project = Project::factory()->create(['company_id' => $company->id]);
+
+        $overdueTask = Task::factory()->create([
+            'company_id' => $company->id,
+            'project_id' => $project->id,
+            'assignee_id' => $user->id,
+            'due_at' => Carbon::now()->subDays(5),
+            'status' => TaskStatus::in_progress,
+        ]);
+
+        $job = new SendAlertJob(
+            $user->id,
+            collect([$overdueTask]),
+            collect([]),
+            []
+        );
+
+        $job->handle();
+
+        Mail::assertNothingQueued();
+    }
+
+    public function test_job_sends_separate_emails_for_overdue_and_near_due_tasks(): void
+    {
+        Mail::fake();
+
+        $user = User::factory()->create(['email_notifications_enabled' => true]);
+        $company = Company::factory()->create();
+        $user->companies()->attach($company->id);
+        $project = Project::factory()->create(['company_id' => $company->id]);
+
+        $overdueTask = Task::factory()->create([
+            'company_id' => $company->id,
+            'project_id' => $project->id,
+            'assignee_id' => $user->id,
+            'due_at' => Carbon::now()->subDays(5),
+            'status' => TaskStatus::in_progress,
+        ]);
+
+        $nearDueTask = Task::factory()->create([
+            'company_id' => $company->id,
+            'project_id' => $project->id,
+            'assignee_id' => $user->id,
+            'due_at' => Carbon::now()->addDays(2),
+            'status' => TaskStatus::in_progress,
+        ]);
+
+        $job = new SendAlertJob(
+            $user->id,
+            collect([$overdueTask]),
+            collect([$nearDueTask]),
+            []
+        );
+
+        $job->handle();
+
+        Mail::assertQueuedCount(2);
+        Mail::assertQueued(AlertMailable::class, function ($mail) {
+            return $mail->alertType === 'overdue';
+        });
+        Mail::assertQueued(AlertMailable::class, function ($mail) {
+            return $mail->alertType === 'near_due';
+        });
     }
 }
 
