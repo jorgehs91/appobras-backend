@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\Admin\AuditLogController;
 use App\Http\Controllers\Admin\RoleController;
 use App\Http\Controllers\CompanyController;
 use App\Http\Controllers\ContractorController;
@@ -49,6 +50,7 @@ Route::prefix('v1')->group(function (): void {
             Route::get('/permissions', [RoleController::class, 'permissions'])->middleware('permission:users.update,sanctum');
             Route::post('/roles/{role}/assign', [RoleController::class, 'assign'])->middleware('permission:users.update,sanctum');
             Route::post('/roles/{role}/revoke', [RoleController::class, 'revoke'])->middleware('permission:users.update,sanctum');
+            Route::get('/audit-logs', [AuditLogController::class, 'index'])->middleware('permission:users.update,sanctum');
         });
 
         // Projects (escopo por company obrigatório, por project opcional via header)

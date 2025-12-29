@@ -2,7 +2,12 @@
 
 namespace App\Providers;
 
+use App\Models\Contractor;
+use App\Models\Document;
+use App\Models\Phase;
+use App\Models\Project;
 use App\Models\Task;
+use App\Observers\AuditLogObserver;
 use App\Observers\TaskObserver;
 use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Cache\RateLimiting\Limit;
@@ -27,6 +32,13 @@ class AppServiceProvider extends ServiceProvider
     {
         // Register observers
         Task::observe(TaskObserver::class);
+
+        // Register audit log observers for main models
+        Project::observe(AuditLogObserver::class);
+        Phase::observe(AuditLogObserver::class);
+        Task::observe(AuditLogObserver::class);
+        Document::observe(AuditLogObserver::class);
+        Contractor::observe(AuditLogObserver::class);
 
         RateLimiter::for('login', function (Request $request) {
             $email = (string) $request->input('email');
