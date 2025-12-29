@@ -78,9 +78,11 @@ Route::prefix('v1')->group(function (): void {
             Route::patch('/projects/{project}/tasks/bulk', [TaskController::class, 'bulkUpdate']);
             Route::put('/tasks/{task}', [TaskController::class, 'update']);
             Route::patch('/tasks/{task}/status', [TaskController::class, 'updateStatus']);
+            Route::patch('/tasks/{task}/dependencies', [TaskDependencyController::class, 'updateBulk']);
             Route::delete('/tasks/{task}', [TaskController::class, 'destroy']);
 
             // Task Dependencies (escopo project)
+            Route::get('/task-dependencies', [TaskDependencyController::class, 'index']);
             Route::post('/projects/{project}/task-dependencies', [TaskDependencyController::class, 'store']);
             Route::post('/projects/{project}/task-dependencies/bulk', [TaskDependencyController::class, 'storeBulk']);
             Route::put('/task-dependencies/{taskDependency}', [TaskDependencyController::class, 'update']);

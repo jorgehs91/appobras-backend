@@ -496,5 +496,277 @@ class TaskDependencyTest extends TestCase
             'id' => $task->id,
         ]);
     }
+
+    public function test_can_list_task_dependencies_by_task_id(): void
+    {
+        $user = User::factory()->create();
+        $company = Company::factory()->create();
+        $user->companies()->attach($company->id);
+        Sanctum::actingAs($user);
+
+        $project = Project::factory()->create(['company_id' => $company->id]);
+        $user->projects()->attach($project->id, ['role' => 'Manager']);
+
+        $phase = Phase::factory()->create([
+            'company_id' => $company->id,
+            'project_id' => $project->id,
+        ]);
+
+        $task1 = Task::factory()->create([
+            'company_id' => $company->id,
+            'project_id' => $project->id,
+            'phase_id' => $phase->id,
+        ]);
+
+        $task2 = Task::factory()->create([
+            'company_id' => $company->id,
+            'project_id' => $project->id,
+            'phase_id' => $phase->id,
+        ]);
+
+        $task3 = Task::factory()->create([
+            'company_id' => $company->id,
+            'project_id' => $project->id,
+            'phase_id' => $phase->id,
+        ]);
+
+        // Create dependencies: task1 -> task2, task3 -> task1
+        $dep1 = TaskDependency::create([
+            'task_id' => $task1->id,
+            'depends_on_task_id' => $task2->id,
+        ]);
+
+        $dep2 = TaskDependency::create([
+            'task_id' => $task3->id,
+            'depends_on_task_id' => $task1->id,
+        ]);
+
+        $response = $this->withHeader('X-Company-Id', $company->id)
+            ->getJson("/api/v1/task-dependencies?task_id={$task1->id}");
+
+        $response->assertStatus(200)
+            ->assertJsonCount(2, 'data')
+            ->assertJsonPath('data.0.id', function ($id) use ($dep1, $dep2) {
+                return in_array($id, [$dep1->id, $dep2->id]);
+            })
+            ->assertJsonPath('data.1.id', function ($id) use ($dep1, $dep2) {
+                return in_array($id, [$dep1->id, $dep2->id]);
+            });
+    }
+
+    public function test_index_requires_task_id_parameter(): void
+    {
+        $user = User::factory()->create();
+        $company = Company::factory()->create();
+        $user->companies()->attach($company->id);
+        Sanctum::actingAs($user);
+
+        $response = $this->withHeader('X-Company-Id', $company->id)
+            ->getJson('/api/v1/task-dependencies');
+
+        $response->assertStatus(422)
+            ->assertJsonValidationErrors(['task_id']);
+    }
+
+    public function test_index_returns_403_for_unauthorized_task(): void
+    {
+        $user = User::factory()->create();
+        $company = Company::factory()->create();
+        $user->companies()->attach($company->id);
+        Sanctum::actingAs($user);
+
+        $otherCompany = Company::factory()->create();
+        $otherProject = Project::factory()->create(['company_id' => $otherCompany->id]);
+        $otherPhase = Phase::factory()->create([
+            'company_id' => $otherCompany->id,
+            'project_id' => $otherProject->id,
+        ]);
+        $otherTask = Task::factory()->create([
+            'company_id' => $otherCompany->id,
+            'project_id' => $otherProject->id,
+            'phase_id' => $otherPhase->id,
+        ]);
+
+        $response = $this->withHeader('X-Company-Id', $company->id)
+            ->getJson("/api/v1/task-dependencies?task_id={$otherTask->id}");
+
+        $response->assertStatus(403);
+    }
+
+    public function test_can_update_bulk_dependencies_for_task(): void
+    {
+        $user = User::factory()->create();
+        $company = Company::factory()->create();
+        $user->companies()->attach($company->id);
+        Sanctum::actingAs($user);
+
+        $project = Project::factory()->create(['company_id' => $company->id]);
+        $user->projects()->attach($project->id, ['role' => 'Manager']);
+
+        $phase = Phase::factory()->create([
+            'company_id' => $company->id,
+            'project_id' => $project->id,
+        ]);
+
+        $task1 = Task::factory()->create([
+            'company_id' => $company->id,
+            'project_id' => $project->id,
+            'phase_id' => $phase->id,
+        ]);
+
+        $task2 = Task::factory()->create([
+            'company_id' => $company->id,
+            'project_id' => $project->id,
+            'phase_id' => $phase->id,
+        ]);
+
+        $task3 = Task::factory()->create([
+            'company_id' => $company->id,
+            'project_id' => $project->id,
+            'phase_id' => $phase->id,
+        ]);
+
+        $task4 = Task::factory()->create([
+            'company_id' => $company->id,
+            'project_id' => $project->id,
+            'phase_id' => $phase->id,
+        ]);
+
+        // Create existing dependency
+        $existingDep = TaskDependency::create([
+            'task_id' => $task1->id,
+            'depends_on_task_id' => $task2->id,
+        ]);
+
+        // Add task3 and task4 as dependencies, remove task2
+        $response = $this->withHeader('X-Company-Id', $company->id)
+            ->patchJson("/api/v1/tasks/{$task1->id}/dependencies", [
+                'add' => [$task3->id, $task4->id],
+                'remove' => [$existingDep->id],
+            ]);
+
+        $response->assertStatus(200)
+            ->assertJsonPath('data.removed', 1)
+            ->assertJsonCount(2, 'data.added');
+
+        // Verify task2 dependency was removed
+        $this->assertSoftDeleted('task_dependencies', [
+            'id' => $existingDep->id,
+        ]);
+
+        // Verify task3 and task4 dependencies were added
+        $this->assertDatabaseHas('task_dependencies', [
+            'task_id' => $task1->id,
+            'depends_on_task_id' => $task3->id,
+        ]);
+
+        $this->assertDatabaseHas('task_dependencies', [
+            'task_id' => $task1->id,
+            'depends_on_task_id' => $task4->id,
+        ]);
+    }
+
+    public function test_update_bulk_validates_cycle_detection(): void
+    {
+        $user = User::factory()->create();
+        $company = Company::factory()->create();
+        $user->companies()->attach($company->id);
+        Sanctum::actingAs($user);
+
+        $project = Project::factory()->create(['company_id' => $company->id]);
+        $user->projects()->attach($project->id, ['role' => 'Manager']);
+
+        $phase = Phase::factory()->create([
+            'company_id' => $company->id,
+            'project_id' => $project->id,
+        ]);
+
+        $task1 = Task::factory()->create([
+            'company_id' => $company->id,
+            'project_id' => $project->id,
+            'phase_id' => $phase->id,
+        ]);
+
+        $task2 = Task::factory()->create([
+            'company_id' => $company->id,
+            'project_id' => $project->id,
+            'phase_id' => $phase->id,
+        ]);
+
+        // Create dependency: task1 -> task2
+        TaskDependency::create([
+            'task_id' => $task1->id,
+            'depends_on_task_id' => $task2->id,
+        ]);
+
+        // Try to add cycle: task2 -> task1
+        $response = $this->withHeader('X-Company-Id', $company->id)
+            ->patchJson("/api/v1/tasks/{$task2->id}/dependencies", [
+                'add' => [$task1->id],
+            ]);
+
+        $response->assertStatus(422)
+            ->assertJsonValidationErrors(['add.0']);
+    }
+
+    public function test_update_bulk_returns_403_for_unauthorized_task(): void
+    {
+        $user = User::factory()->create();
+        $company = Company::factory()->create();
+        $user->companies()->attach($company->id);
+        Sanctum::actingAs($user);
+
+        $otherCompany = Company::factory()->create();
+        $otherProject = Project::factory()->create(['company_id' => $otherCompany->id]);
+        $otherPhase = Phase::factory()->create([
+            'company_id' => $otherCompany->id,
+            'project_id' => $otherProject->id,
+        ]);
+        $otherTask = Task::factory()->create([
+            'company_id' => $otherCompany->id,
+            'project_id' => $otherProject->id,
+            'phase_id' => $otherPhase->id,
+        ]);
+
+        $response = $this->withHeader('X-Company-Id', $company->id)
+            ->patchJson("/api/v1/tasks/{$otherTask->id}/dependencies", [
+                'add' => [],
+            ]);
+
+        $response->assertStatus(403);
+    }
+
+    public function test_update_bulk_handles_empty_arrays(): void
+    {
+        $user = User::factory()->create();
+        $company = Company::factory()->create();
+        $user->companies()->attach($company->id);
+        Sanctum::actingAs($user);
+
+        $project = Project::factory()->create(['company_id' => $company->id]);
+        $user->projects()->attach($project->id, ['role' => 'Manager']);
+
+        $phase = Phase::factory()->create([
+            'company_id' => $company->id,
+            'project_id' => $project->id,
+        ]);
+
+        $task = Task::factory()->create([
+            'company_id' => $company->id,
+            'project_id' => $project->id,
+            'phase_id' => $phase->id,
+        ]);
+
+        $response = $this->withHeader('X-Company-Id', $company->id)
+            ->patchJson("/api/v1/tasks/{$task->id}/dependencies", [
+                'add' => [],
+                'remove' => [],
+            ]);
+
+        $response->assertStatus(200)
+            ->assertJsonPath('data.removed', 0)
+            ->assertJsonCount(0, 'data.added');
+    }
+
 }
 

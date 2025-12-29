@@ -28,6 +28,88 @@ class TaskDependencyController extends Controller
     }
 
     /**
+     * @OA\Get(
+     *     path="/api/v1/task-dependencies",
+     *     summary="Listar dependências de tarefas",
+     *     description="Lista dependências de tarefas filtradas por task_id, com escopo por project_id. Retorna todas as dependências onde a tarefa especificada é dependente ou é requisito.",
+     *     tags={"Task Dependencies"},
+     *     security={{"sanctum":{}}},
+     *     @OA\Parameter(name="X-Company-Id", in="header", required=true, @OA\Schema(type="integer")),
+     *     @OA\Parameter(name="task_id", in="query", required=true, @OA\Schema(type="integer"), description="ID da tarefa para filtrar dependências"),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Lista de dependências",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="data", type="array", @OA\Items(
+     *                 type="object",
+     *                 @OA\Property(property="id", type="integer", example=1),
+     *                 @OA\Property(property="task_id", type="integer", example=1),
+     *                 @OA\Property(property="depends_on_task_id", type="integer", example=2),
+     *                 @OA\Property(property="created_at", type="string", format="date-time"),
+     *                 @OA\Property(property="updated_at", type="string", format="date-time")
+     *             ))
+     *         )
+     *     ),
+     *     @OA\Response(response=403, description="Sem permissão"),
+     *     @OA\Response(response=422, description="Erro de validação (task_id obrigatório)")
+     * )
+     */
+    public function index(Request $request): JsonResponse
+    {
+        /** @var \App\Models\User $user */
+        $user = $request->user();
+        $companyId = (int) $request->header('X-Company-Id');
+
+        abort_unless($companyId && $user->companies()->whereKey($companyId)->exists(), 403);
+
+        $request->validate([
+            'task_id' => ['required', 'integer', 'exists:tasks,id'],
+        ]);
+
+        $taskId = (int) $request->input('task_id');
+
+        // Verify task belongs to user's company and user has access to the project
+        $task = \App\Models\Task::find($taskId);
+        abort_unless($task, 404);
+        abort_unless($task->company_id === $companyId, 403);
+        abort_unless($user->projects()->whereKey($task->project_id)->exists(), 403);
+
+        // Get dependencies where task_id is the dependent task or the prerequisite task
+        $dependencies = TaskDependency::query()
+            ->where(function ($query) use ($taskId) {
+                $query->where('task_id', $taskId)
+                    ->orWhere('depends_on_task_id', $taskId);
+            })
+            ->whereHas('task', function ($query) use ($task->project_id) {
+                $query->where('project_id', $task->project_id);
+            })
+            ->whereHas('dependsOnTask', function ($query) use ($task->project_id) {
+                $query->where('project_id', $task->project_id);
+            })
+            ->with(['task', 'dependsOnTask'])
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        return response()->json([
+            'data' => $dependencies->map(fn ($dep) => [
+                'id' => $dep->id,
+                'task_id' => $dep->task_id,
+                'depends_on_task_id' => $dep->depends_on_task_id,
+                'task' => [
+                    'id' => $dep->task->id,
+                    'title' => $dep->task->title,
+                ],
+                'depends_on_task' => [
+                    'id' => $dep->dependsOnTask->id,
+                    'title' => $dep->dependsOnTask->title,
+                ],
+                'created_at' => $dep->created_at,
+                'updated_at' => $dep->updated_at,
+            ]),
+        ]);
+    }
+
+    /**
      * @OA\Post(
      *     path="/api/v1/projects/{project}/task-dependencies",
      *     summary="Criar dependência entre tarefas",
@@ -430,5 +512,178 @@ class TaskDependencyController extends Controller
         $taskDependency->delete();
 
         return response()->json(null, 204);
+    }
+
+    /**
+     * @OA\Patch(
+     *     path="/api/v1/tasks/{task}/dependencies",
+     *     summary="Atualizar dependências de uma tarefa em bulk",
+     *     description="Adiciona ou remove múltiplas dependências de uma tarefa específica em uma única operação. Permite adicionar novas dependências e remover existentes.",
+     *     tags={"Task Dependencies"},
+     *     security={{"sanctum":{}}},
+     *     @OA\Parameter(name="X-Company-Id", in="header", required=true, @OA\Schema(type="integer")),
+     *     @OA\Parameter(name="task", in="path", required=true, @OA\Schema(type="integer"), description="ID da tarefa"),
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             @OA\Property(property="add", type="array", @OA\Items(type="integer"), description="IDs das tarefas que esta tarefa dependerá (adicionar dependências)"),
+     *             @OA\Property(property="remove", type="array", @OA\Items(type="integer"), description="IDs das dependências a serem removidas")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Dependências atualizadas com sucesso",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="data", type="object",
+     *                 @OA\Property(property="added", type="array", @OA\Items(type="object")),
+     *                 @OA\Property(property="removed", type="integer", description="Número de dependências removidas")
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(response=403, description="Sem permissão"),
+     *     @OA\Response(response=404, description="Tarefa não encontrada"),
+     *     @OA\Response(response=422, description="Erro de validação (ciclo detectado, etc)")
+     * )
+     */
+    public function updateBulk(Request $request, \App\Models\Task $task): JsonResponse
+    {
+        /** @var \App\Models\User $user */
+        $user = $request->user();
+        $companyId = (int) $request->header('X-Company-Id');
+
+        abort_unless($companyId && $user->companies()->whereKey($companyId)->exists(), 403);
+        abort_unless($task->company_id === $companyId, 403);
+        abort_unless($user->projects()->whereKey($task->project_id)->exists(), 403);
+
+        $request->validate([
+            'add' => ['sometimes', 'array'],
+            'add.*' => ['integer', 'exists:tasks,id', 'different:task'],
+            'remove' => ['sometimes', 'array'],
+            'remove.*' => ['integer', 'exists:task_dependencies,id'],
+        ]);
+
+        $toAdd = $request->input('add', []);
+        $toRemove = $request->input('remove', []);
+
+        $errors = [];
+        $added = [];
+
+        // Validate all dependencies to add before creating any
+        foreach ($toAdd as $index => $dependsOnTaskId) {
+            $dependsOnTaskId = (int) $dependsOnTaskId;
+
+            // Verify task belongs to the same project
+            $dependsOnTask = \App\Models\Task::find($dependsOnTaskId);
+            if (! $dependsOnTask || $dependsOnTask->project_id !== $task->project_id) {
+                $errors["add.{$index}"] = ['A tarefa não pertence ao mesmo projeto.'];
+                continue;
+            }
+
+            // Validate cycle detection
+            $cycle = $this->dependencyService->detectCycleOnAdd($task->id, $dependsOnTaskId);
+            if ($cycle !== null) {
+                $cyclePath = implode(' -> ', $cycle);
+                $errors["add.{$index}"] = [
+                    sprintf(
+                        'Esta dependência criaria um ciclo: %s.',
+                        $cyclePath
+                    ),
+                ];
+                continue;
+            }
+
+            // Check for duplicate
+            $exists = TaskDependency::where('task_id', $task->id)
+                ->where('depends_on_task_id', $dependsOnTaskId)
+                ->exists();
+
+            if ($exists) {
+                $errors["add.{$index}"] = ['Esta dependência já existe.'];
+            }
+        }
+
+        if (! empty($errors)) {
+            Log::warning('Bulk dependency update failed validation', [
+                'task_id' => $task->id,
+                'errors' => $errors,
+            ]);
+
+            throw ValidationException::withMessages($errors);
+        }
+
+        try {
+            DB::beginTransaction();
+
+            // Remove dependencies
+            $removedCount = 0;
+            if (! empty($toRemove)) {
+                $dependenciesToRemove = TaskDependency::whereIn('id', $toRemove)
+                    ->where('task_id', $task->id)
+                    ->get();
+
+                foreach ($dependenciesToRemove as $dependency) {
+                    $dependency->delete();
+                    $removedCount++;
+                }
+            }
+
+            // Add new dependencies
+            foreach ($toAdd as $dependsOnTaskId) {
+                $dependsOnTaskId = (int) $dependsOnTaskId;
+
+                // Double-check it doesn't exist (race condition protection)
+                $exists = TaskDependency::where('task_id', $task->id)
+                    ->where('depends_on_task_id', $dependsOnTaskId)
+                    ->exists();
+
+                if (! $exists) {
+                    try {
+                        $taskDependency = TaskDependency::create([
+                            'task_id' => $task->id,
+                            'depends_on_task_id' => $dependsOnTaskId,
+                        ]);
+                        $added[] = [
+                            'id' => $taskDependency->id,
+                            'task_id' => $taskDependency->task_id,
+                            'depends_on_task_id' => $taskDependency->depends_on_task_id,
+                            'created_at' => $taskDependency->created_at,
+                            'updated_at' => $taskDependency->updated_at,
+                        ];
+                    } catch (QueryException $e) {
+                        // Handle unique constraint violation
+                        if ($e->getCode() === '23000' || str_contains($e->getMessage(), 'uk_task_dependencies_task_depends')) {
+                            Log::warning('Duplicate dependency in bulk update', [
+                                'task_id' => $task->id,
+                                'depends_on_task_id' => $dependsOnTaskId,
+                            ]);
+                            // Skip this one, don't fail the whole operation
+                            continue;
+                        }
+                        throw $e;
+                    }
+                }
+            }
+
+            DB::commit();
+
+            return response()->json([
+                'data' => [
+                    'added' => $added,
+                    'removed' => $removedCount,
+                ],
+            ]);
+        } catch (ValidationException $e) {
+            throw $e;
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Bulk dependency update failed', [
+                'task_id' => $task->id,
+                'error' => $e->getMessage(),
+            ]);
+
+            throw ValidationException::withMessages([
+                'dependencies' => ['Erro ao atualizar dependências. Tente novamente.'],
+            ]);
+        }
     }
 }
