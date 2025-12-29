@@ -75,16 +75,17 @@ class TaskDependencyController extends Controller
         abort_unless($user->projects()->whereKey($task->project_id)->exists(), 403);
 
         // Get dependencies where task_id is the dependent task or the prerequisite task
+        $projectId = $task->project_id;
         $dependencies = TaskDependency::query()
             ->where(function ($query) use ($taskId) {
                 $query->where('task_id', $taskId)
                     ->orWhere('depends_on_task_id', $taskId);
             })
-            ->whereHas('task', function ($query) use ($task->project_id) {
-                $query->where('project_id', $task->project_id);
+            ->whereHas('task', function ($query) use ($projectId) {
+                $query->where('project_id', $projectId);
             })
-            ->whereHas('dependsOnTask', function ($query) use ($task->project_id) {
-                $query->where('project_id', $task->project_id);
+            ->whereHas('dependsOnTask', function ($query) use ($projectId) {
+                $query->where('project_id', $projectId);
             })
             ->with(['task', 'dependsOnTask'])
             ->orderBy('created_at', 'desc')

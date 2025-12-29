@@ -123,4 +123,18 @@ return [
         'store' => env('APP_MAINTENANCE_STORE', 'database'),
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Alert Configuration
+    |--------------------------------------------------------------------------
+    |
+    | These values determine the thresholds for generating alerts.
+    | ALERT_TASK_DAYS: Number of days before task due date to send alerts (default: 3)
+    | ALERT_LICENSE_DAYS: Number of days before license expiration to send alerts (default: 30)
+    |
+    */
+
+    'alert_task_days' => env('ALERT_TASK_DAYS', 3),
+    'alert_license_days' => env('ALERT_LICENSE_DAYS', 30),
+
 ];
