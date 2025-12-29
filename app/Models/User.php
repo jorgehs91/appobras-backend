@@ -3,6 +3,7 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+use App\Enums\SystemRole;
 use App\Models\Notification;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -100,5 +101,43 @@ class User extends Authenticatable
     public function readUserNotifications()
     {
         return $this->userNotifications()->read();
+    }
+
+    /**
+     * Check if the user has a specific system role.
+     *
+     * @param SystemRole $role
+     * @return bool
+     */
+    public function hasSystemRole(SystemRole $role): bool
+    {
+        return $this->hasRole($role->value);
+    }
+
+    /**
+     * Check if the user has any of the given system roles.
+     *
+     * @param array<SystemRole> $roles
+     * @return bool
+     */
+    public function hasAnySystemRole(array $roles): bool
+    {
+        foreach ($roles as $role) {
+            if ($this->hasRole($role->value)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Check if the user has budget/financial access.
+     *
+     * @return bool
+     */
+    public function hasBudgetAccess(): bool
+    {
+        return $this->hasAnySystemRole(SystemRole::budgetAccessRoles());
     }
 }

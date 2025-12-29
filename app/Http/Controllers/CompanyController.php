@@ -97,7 +97,7 @@ class CompanyController extends Controller
         // define contexto de equipe
         app(PermissionRegistrar::class)->setPermissionsTeamId($company->id);
         // Admin Obra
-        $user->assignRole(Role::findByName('Admin Obra', 'sanctum'));
+        $user->assignRole(Role::findByName(\App\Enums\SystemRole::AdminObra->value, 'sanctum'));
 
         // define company ativa
         $user->current_company_id = $company->id;

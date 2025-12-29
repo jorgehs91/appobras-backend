@@ -15,6 +15,8 @@ use App\Http\Controllers\ProjectMembersController;
 use App\Http\Controllers\ProjectProgressController;
 use App\Http\Controllers\TaskController;
 use App\Http\Controllers\TaskDependencyController;
+use App\Http\Controllers\BudgetController;
+use App\Http\Controllers\CostItemController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('v1')->group(function (): void {
@@ -105,6 +107,21 @@ Route::prefix('v1')->group(function (): void {
             // Progress & Stats
             Route::get('/projects/{project}/progress', [ProjectProgressController::class, 'show']);
             Route::get('/dashboard/stats', [DashboardController::class, 'stats']);
+
+            // Budgets (escopo project)
+            Route::get('/projects/{project}/budgets', [BudgetController::class, 'index']);
+            Route::post('/projects/{project}/budgets', [BudgetController::class, 'store']);
+            Route::get('/projects/{project}/budget/summary', [BudgetController::class, 'summary']);
+            Route::get('/budgets/{budget}', [BudgetController::class, 'show']);
+            Route::match(['put', 'patch'], '/budgets/{budget}', [BudgetController::class, 'update']);
+            Route::delete('/budgets/{budget}', [BudgetController::class, 'destroy']);
+
+            // Cost Items (escopo budget/project)
+            Route::get('/projects/{project}/budgets/{budget}/cost-items', [CostItemController::class, 'index']);
+            Route::post('/projects/{project}/budgets/{budget}/cost-items', [CostItemController::class, 'store']);
+            Route::get('/cost-items/{costItem}', [CostItemController::class, 'show']);
+            Route::match(['put', 'patch'], '/cost-items/{costItem}', [CostItemController::class, 'update']);
+            Route::delete('/cost-items/{costItem}', [CostItemController::class, 'destroy']);
         });
     });
 });

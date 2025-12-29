@@ -2,6 +2,7 @@
 
 namespace App\Policies;
 
+use App\Enums\SystemRole;
 use App\Models\Project;
 use App\Models\User;
 
@@ -13,7 +14,7 @@ class ProjectMemberPolicy
     public function viewAny(User $user, Project $project): bool
     {
         // Only Admin Obra can view project members
-        return $user->hasRole('Admin Obra')
+        return $user->hasSystemRole(SystemRole::AdminObra)
             && $user->companies()->whereKey($project->company_id)->exists();
     }
 
@@ -23,7 +24,7 @@ class ProjectMemberPolicy
     public function create(User $user, Project $project): bool
     {
         // Only Admin Obra can add members to projects
-        return $user->hasRole('Admin Obra')
+        return $user->hasSystemRole(SystemRole::AdminObra)
             && $user->companies()->whereKey($project->company_id)->exists();
     }
 
@@ -33,7 +34,7 @@ class ProjectMemberPolicy
     public function update(User $user, Project $project): bool
     {
         // Only Admin Obra can update member roles
-        return $user->hasRole('Admin Obra')
+        return $user->hasSystemRole(SystemRole::AdminObra)
             && $user->companies()->whereKey($project->company_id)->exists();
     }
 
@@ -43,7 +44,7 @@ class ProjectMemberPolicy
     public function delete(User $user, Project $project): bool
     {
         // Only Admin Obra can remove members from projects
-        return $user->hasRole('Admin Obra')
+        return $user->hasSystemRole(SystemRole::AdminObra)
             && $user->companies()->whereKey($project->company_id)->exists();
     }
 }

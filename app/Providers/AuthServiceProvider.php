@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Enums\SystemRole;
 use App\Models\User;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
 use Illuminate\Support\Facades\Gate;
@@ -27,7 +28,11 @@ class AuthServiceProvider extends ServiceProvider
         $this->registerPolicies();
 
         Gate::define('admin-only', function (User $user): bool {
-            return $user->hasRole('Admin Obra');
+            return $user->hasSystemRole(SystemRole::AdminObra);
+        });
+
+        Gate::define('budget-access', function (User $user): bool {
+            return $user->hasBudgetAccess();
         });
     }
 }
