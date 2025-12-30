@@ -2,12 +2,15 @@
 
 namespace App\Models;
 
+use App\Events\ApprovedPurchaseRequest;
 use App\Enums\PurchaseRequestStatus;
+use App\Jobs\GeneratePurchaseOrder;
 use App\Traits\AuditTrait;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Validation\ValidationException;
 
@@ -69,6 +72,14 @@ class PurchaseRequest extends Model
                         ]);
                     }
                 }
+            }
+        });
+
+        static::updated(function (PurchaseRequest $purchaseRequest): void {
+            // Dispatch event when PR is approved
+            if ($purchaseRequest->isDirty('status') && $purchaseRequest->status === PurchaseRequestStatus::approved) {
+                event(new ApprovedPurchaseRequest($purchaseRequest));
+                GeneratePurchaseOrder::dispatch($purchaseRequest);
             }
         });
     }
@@ -189,6 +200,14 @@ class PurchaseRequest extends Model
     public function items(): HasMany
     {
         return $this->hasMany(PurchaseRequestItem::class);
+    }
+
+    /**
+     * Get the purchase order generated from this purchase request.
+     */
+    public function purchaseOrder(): HasOne
+    {
+        return $this->hasOne(PurchaseOrder::class);
     }
 
     /**

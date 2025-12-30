@@ -1,6 +1,7 @@
 # Template: Documentação de Features
 
 Este documento serve como **template e guia de referência** para criar documentações de features no AppObras. Use este template como base para garantir consistência e completude nas documentações.
+Certifique-se de que o documento criado não seja uma duplicata do que já existe. Avalie se é mais produtivo apenas atualizar alguma documentação que já existe.
 
 > **Referência:** Esta documentação segue o padrão estabelecido em [EXPENSES.md](./EXPENSES.md)
 

@@ -54,6 +54,7 @@ class PurchaseRequestTest extends TestCase
 
         PurchaseRequestItem::factory()->create([
             'purchase_request_id' => $purchaseRequest->id,
+            'cost_item_id' => null,
             'quantity' => 10,
             'unit_price' => 100.00,
             'total' => 1000.00,
@@ -61,6 +62,7 @@ class PurchaseRequestTest extends TestCase
 
         PurchaseRequestItem::factory()->create([
             'purchase_request_id' => $purchaseRequest->id,
+            'cost_item_id' => null,
             'quantity' => 5,
             'unit_price' => 50.00,
             'total' => 250.00,
