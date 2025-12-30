@@ -19,6 +19,8 @@ use App\Http\Controllers\BudgetController;
 use App\Http\Controllers\CostItemController;
 use App\Http\Controllers\ExpenseController;
 use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\PurchaseRequestController;
+use App\Http\Controllers\SupplierController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('v1')->group(function (): void {
@@ -75,6 +77,13 @@ Route::prefix('v1')->group(function (): void {
             Route::post('/contractors', [ContractorController::class, 'store']);
             Route::put('/contractors/{contractor}', [ContractorController::class, 'update']);
             Route::delete('/contractors/{contractor}', [ContractorController::class, 'destroy']);
+
+            // Suppliers (escopo company)
+            Route::get('/suppliers', [SupplierController::class, 'index']);
+            Route::get('/suppliers/{supplier}', [SupplierController::class, 'show']);
+            Route::post('/suppliers', [SupplierController::class, 'store']);
+            Route::put('/suppliers/{supplier}', [SupplierController::class, 'update']);
+            Route::delete('/suppliers/{supplier}', [SupplierController::class, 'destroy']);
 
             // Phases (escopo project)
             Route::get('/projects/{project}/phases', [PhaseController::class, 'index']);
@@ -138,6 +147,16 @@ Route::prefix('v1')->group(function (): void {
             Route::match(['put', 'patch'], '/expenses/{expense}', [ExpenseController::class, 'update']);
             Route::delete('/expenses/{expense}', [ExpenseController::class, 'destroy']);
             Route::get('/expenses/{expense}/receipt', [ExpenseController::class, 'downloadReceipt']);
+
+            // Purchase Requests (escopo project)
+            Route::get('/projects/{project}/purchase-requests', [PurchaseRequestController::class, 'index']);
+            Route::post('/projects/{project}/purchase-requests', [PurchaseRequestController::class, 'store']);
+            Route::get('/purchase-requests/{purchaseRequest}', [PurchaseRequestController::class, 'show']);
+            Route::put('/purchase-requests/{purchaseRequest}', [PurchaseRequestController::class, 'update']);
+            Route::delete('/purchase-requests/{purchaseRequest}', [PurchaseRequestController::class, 'destroy']);
+            Route::post('/purchase-requests/{purchaseRequest}/submit', [PurchaseRequestController::class, 'submit']);
+            Route::post('/purchase-requests/{purchaseRequest}/approve', [PurchaseRequestController::class, 'approve']);
+            Route::post('/purchase-requests/{purchaseRequest}/reject', [PurchaseRequestController::class, 'reject']);
         });
     });
 });
