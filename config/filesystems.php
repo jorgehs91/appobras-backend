@@ -64,6 +64,19 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Expense Receipts Disk
+    |--------------------------------------------------------------------------
+    |
+    | Define qual disk deve ser usado para armazenar comprovantes de despesas.
+    | Por padrão usa 'local' (armazenamento no servidor).
+    | Para usar S3, defina EXPENSE_RECEIPTS_DISK=s3 no .env
+    |
+    */
+
+    'expense_receipts_disk' => env('EXPENSE_RECEIPTS_DISK', 'local'),
+
+    /*
+    |--------------------------------------------------------------------------
     | Symbolic Links
     |--------------------------------------------------------------------------
     |

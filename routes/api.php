@@ -17,6 +17,7 @@ use App\Http\Controllers\TaskController;
 use App\Http\Controllers\TaskDependencyController;
 use App\Http\Controllers\BudgetController;
 use App\Http\Controllers\CostItemController;
+use App\Http\Controllers\ExpenseController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('v1')->group(function (): void {
@@ -122,6 +123,14 @@ Route::prefix('v1')->group(function (): void {
             Route::get('/cost-items/{costItem}', [CostItemController::class, 'show']);
             Route::match(['put', 'patch'], '/cost-items/{costItem}', [CostItemController::class, 'update']);
             Route::delete('/cost-items/{costItem}', [CostItemController::class, 'destroy']);
+
+            // Expenses (escopo project)
+            Route::get('/projects/{project}/expenses', [ExpenseController::class, 'index']);
+            Route::post('/projects/{project}/expenses', [ExpenseController::class, 'store']);
+            Route::get('/expenses/{expense}', [ExpenseController::class, 'show']);
+            Route::match(['put', 'patch'], '/expenses/{expense}', [ExpenseController::class, 'update']);
+            Route::delete('/expenses/{expense}', [ExpenseController::class, 'destroy']);
+            Route::get('/expenses/{expense}/receipt', [ExpenseController::class, 'downloadReceipt']);
         });
     });
 });
