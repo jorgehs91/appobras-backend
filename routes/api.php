@@ -47,6 +47,7 @@ Route::prefix('v1')->group(function (): void {
         Route::post('/me/switch-company', [MeController::class, 'switchCompany']);
         Route::post('/me/switch-project', [MeController::class, 'switchProject'])->middleware(['company']);
         Route::put('/user/preferences', [MeController::class, 'updatePreferences']);
+        Route::post('/user/expo-token', [MeController::class, 'updateExpoToken']);
 
         // Admin-only RBAC management (guard sanctum + contexto de empresa)
         Route::prefix('admin')->middleware(['company'])->group(function (): void {

@@ -26,6 +26,7 @@ class User extends Authenticatable
         'email',
         'password',
         'email_notifications_enabled',
+        'expo_push_token',
     ];
 
     /**

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Company;
+use App\Services\ExpoPushService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -152,6 +153,60 @@ class MeController extends Controller
         }
 
         return response()->json([
+            'data' => new \App\Http\Resources\UserResource($user),
+        ], 200);
+    }
+
+    /**
+     * @OA\Post(
+     *     path="/api/v1/user/expo-token",
+     *     summary="Registrar ou atualizar token Expo Push",
+     *     description="Registra ou atualiza o token Expo Push do usuário autenticado para receber notificações push",
+     *     tags={"Me"},
+     *     security={{"sanctum":{}}},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"expo_push_token"},
+     *             @OA\Property(property="expo_push_token", type="string", example="ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]", description="Token Expo Push do dispositivo")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Token registrado com sucesso",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Expo push token updated successfully"),
+     *             @OA\Property(property="data", ref="#/components/schemas/UserResource")
+     *         )
+     *     ),
+     *     @OA\Response(response=422, description="Erro de validação - token inválido"),
+     *     @OA\Response(response=401, description="Não autenticado")
+     * )
+     */
+    public function updateExpoToken(Request $request, ExpoPushService $expoPushService): JsonResponse
+    {
+        $validated = $request->validate([
+            'expo_push_token' => ['required', 'string', 'max:255'],
+        ]);
+
+        /** @var \App\Models\User $user */
+        $user = $request->user();
+
+        // Validar formato do token Expo
+        if (! $expoPushService->isValidToken($validated['expo_push_token'])) {
+            return response()->json([
+                'message' => 'Invalid Expo push token format',
+                'errors' => [
+                    'expo_push_token' => ['The token must be a valid Expo push token format (ExponentPushToken[...] or ExpoPushToken[...])'],
+                ],
+            ], 422);
+        }
+
+        $user->expo_push_token = $validated['expo_push_token'];
+        $user->save();
+
+        return response()->json([
+            'message' => 'Expo push token updated successfully',
             'data' => new \App\Http\Resources\UserResource($user),
         ], 200);
     }

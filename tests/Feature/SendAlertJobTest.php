@@ -10,9 +10,11 @@ use App\Models\Notification;
 use App\Models\Project;
 use App\Models\Task;
 use App\Models\User;
+use App\Services\ExpoPushService;
 use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Mail;
 use Tests\TestCase;
 
@@ -42,7 +44,7 @@ class SendAlertJobTest extends TestCase
             []
         );
 
-        $job->handle();
+        $job->handle(app(ExpoPushService::class));
 
         $this->assertDatabaseHas('notifications', [
             'user_id' => $user->id,
@@ -83,7 +85,7 @@ class SendAlertJobTest extends TestCase
             []
         );
 
-        $job->handle();
+        $job->handle(app(ExpoPushService::class));
 
         $this->assertDatabaseHas('notifications', [
             'user_id' => $user->id,
@@ -140,7 +142,7 @@ class SendAlertJobTest extends TestCase
             []
         );
 
-        $job->handle();
+        $job->handle(app(ExpoPushService::class));
 
         $this->assertDatabaseCount('notifications', 3);
 
@@ -174,7 +176,7 @@ class SendAlertJobTest extends TestCase
             []
         );
 
-        $job->handle();
+        $job->handle(app(ExpoPushService::class));
 
         $this->assertDatabaseCount('notifications', 0);
     }
@@ -190,7 +192,7 @@ class SendAlertJobTest extends TestCase
             []
         );
 
-        $job->handle();
+        $job->handle(app(ExpoPushService::class));
 
         $this->assertDatabaseCount('notifications', 0);
     }
@@ -220,7 +222,7 @@ class SendAlertJobTest extends TestCase
             []
         );
 
-        $job->handle();
+        $job->handle(app(ExpoPushService::class));
 
         $notification = Notification::where('user_id', $user->id)->first();
 
@@ -254,7 +256,7 @@ class SendAlertJobTest extends TestCase
             []
         );
 
-        $job->handle();
+        $job->handle(app(ExpoPushService::class));
 
         Mail::assertQueued(AlertMailable::class, function ($mail) use ($user, $overdueTask) {
             return $mail->user->id === $user->id
@@ -287,7 +289,7 @@ class SendAlertJobTest extends TestCase
             []
         );
 
-        $job->handle();
+        $job->handle(app(ExpoPushService::class));
 
         Mail::assertQueued(AlertMailable::class, function ($mail) use ($user, $nearDueTask) {
             return $mail->user->id === $user->id
@@ -320,7 +322,7 @@ class SendAlertJobTest extends TestCase
             []
         );
 
-        $job->handle();
+        $job->handle(app(ExpoPushService::class));
 
         Mail::assertNothingQueued();
     }
@@ -357,7 +359,7 @@ class SendAlertJobTest extends TestCase
             []
         );
 
-        $job->handle();
+        $job->handle(app(ExpoPushService::class));
 
         Mail::assertQueuedCount(2);
         Mail::assertQueued(AlertMailable::class, function ($mail) {
@@ -365,6 +367,213 @@ class SendAlertJobTest extends TestCase
         });
         Mail::assertQueued(AlertMailable::class, function ($mail) {
             return $mail->alertType === 'near_due';
+        });
+    }
+
+    public function test_job_sends_push_notification_when_user_has_expo_token(): void
+    {
+        Http::fake([
+            'exp.host/--/api/v2/push/send' => Http::response([
+                'data' => [
+                    [
+                        'status' => 'ok',
+                        'id' => 'test-id',
+                    ],
+                ],
+            ], 200),
+        ]);
+
+        $user = User::factory()->create([
+            'expo_push_token' => 'ExponentPushToken[test-token]',
+        ]);
+        $company = Company::factory()->create();
+        $user->companies()->attach($company->id);
+        $project = Project::factory()->create(['company_id' => $company->id]);
+
+        $overdueTask = Task::factory()->create([
+            'company_id' => $company->id,
+            'project_id' => $project->id,
+            'assignee_id' => $user->id,
+            'due_at' => Carbon::now()->subDays(5),
+            'status' => TaskStatus::in_progress,
+        ]);
+
+        $job = new SendAlertJob(
+            $user->id,
+            collect([$overdueTask]),
+            collect([]),
+            []
+        );
+
+        $job->handle(app(ExpoPushService::class));
+
+        Http::assertSent(function ($request) {
+            $payload = $request->data()[0];
+
+            return $request->url() === 'https://exp.host/--/api/v2/push/send'
+                && $payload['to'] === 'ExponentPushToken[test-token]'
+                && isset($payload['title'])
+                && isset($payload['body'])
+                && isset($payload['data'])
+                && isset($payload['sound'])
+                && isset($payload['badge']);
+        });
+    }
+
+    public function test_job_does_not_send_push_when_user_has_no_expo_token(): void
+    {
+        Http::fake();
+
+        $user = User::factory()->create([
+            'expo_push_token' => null,
+        ]);
+        $company = Company::factory()->create();
+        $user->companies()->attach($company->id);
+        $project = Project::factory()->create(['company_id' => $company->id]);
+
+        $overdueTask = Task::factory()->create([
+            'company_id' => $company->id,
+            'project_id' => $project->id,
+            'assignee_id' => $user->id,
+            'due_at' => Carbon::now()->subDays(5),
+            'status' => TaskStatus::in_progress,
+        ]);
+
+        $job = new SendAlertJob(
+            $user->id,
+            collect([$overdueTask]),
+            collect([]),
+            []
+        );
+
+        $job->handle(app(ExpoPushService::class));
+
+        Http::assertNothingSent();
+    }
+
+    public function test_job_includes_expo_channel_in_notification_channels(): void
+    {
+        $user = User::factory()->create([
+            'expo_push_token' => 'ExponentPushToken[test-token]',
+        ]);
+        $company = Company::factory()->create();
+        $user->companies()->attach($company->id);
+        $project = Project::factory()->create(['company_id' => $company->id]);
+
+        $overdueTask = Task::factory()->create([
+            'company_id' => $company->id,
+            'project_id' => $project->id,
+            'assignee_id' => $user->id,
+            'due_at' => Carbon::now()->subDays(5),
+            'status' => TaskStatus::in_progress,
+        ]);
+
+        $job = new SendAlertJob(
+            $user->id,
+            collect([$overdueTask]),
+            collect([]),
+            []
+        );
+
+        $job->handle(app(ExpoPushService::class));
+
+        $notification = Notification::where('user_id', $user->id)->first();
+
+        $this->assertNotNull($notification);
+        $this->assertContains('expo', $notification->channels);
+        $this->assertContains('database', $notification->channels);
+    }
+
+    public function test_job_sends_push_with_correct_title_and_body_for_single_task(): void
+    {
+        Http::fake([
+            'exp.host/--/api/v2/push/send' => Http::response([
+                'data' => [['status' => 'ok']],
+            ], 200),
+        ]);
+
+        $user = User::factory()->create([
+            'expo_push_token' => 'ExponentPushToken[test-token]',
+        ]);
+        $company = Company::factory()->create();
+        $user->companies()->attach($company->id);
+        $project = Project::factory()->create([
+            'company_id' => $company->id,
+            'name' => 'Test Project',
+        ]);
+
+        $overdueTask = Task::factory()->create([
+            'company_id' => $company->id,
+            'project_id' => $project->id,
+            'assignee_id' => $user->id,
+            'title' => 'Test Task',
+            'due_at' => Carbon::now()->subDays(5),
+            'status' => TaskStatus::in_progress,
+        ]);
+
+        $job = new SendAlertJob(
+            $user->id,
+            collect([$overdueTask]),
+            collect([]),
+            []
+        );
+
+        $job->handle(app(ExpoPushService::class));
+
+        Http::assertSent(function ($request) use ($overdueTask, $project) {
+            $payload = $request->data()[0];
+
+            return $payload['title'] === 'Tarefa Atrasada'
+                && str_contains($payload['body'], $overdueTask->title)
+                && str_contains($payload['body'], $project->name);
+        });
+    }
+
+    public function test_job_sends_push_with_correct_title_for_multiple_tasks(): void
+    {
+        Http::fake([
+            'exp.host/--/api/v2/push/send' => Http::response([
+                'data' => [['status' => 'ok']],
+            ], 200),
+        ]);
+
+        $user = User::factory()->create([
+            'expo_push_token' => 'ExponentPushToken[test-token]',
+        ]);
+        $company = Company::factory()->create();
+        $user->companies()->attach($company->id);
+        $project = Project::factory()->create(['company_id' => $company->id]);
+
+        $overdueTask1 = Task::factory()->create([
+            'company_id' => $company->id,
+            'project_id' => $project->id,
+            'assignee_id' => $user->id,
+            'due_at' => Carbon::now()->subDays(5),
+            'status' => TaskStatus::in_progress,
+        ]);
+
+        $overdueTask2 = Task::factory()->create([
+            'company_id' => $company->id,
+            'project_id' => $project->id,
+            'assignee_id' => $user->id,
+            'due_at' => Carbon::now()->subDays(3),
+            'status' => TaskStatus::in_progress,
+        ]);
+
+        $job = new SendAlertJob(
+            $user->id,
+            collect([$overdueTask1, $overdueTask2]),
+            collect([]),
+            []
+        );
+
+        $job->handle(app(ExpoPushService::class));
+
+        Http::assertSent(function ($request) {
+            $payload = $request->data()[0];
+
+            return $payload['title'] === '2 Tarefas Atrasadas'
+                && str_contains($payload['body'], '2 novas notificações');
         });
     }
 }
