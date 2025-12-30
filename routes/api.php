@@ -18,6 +18,7 @@ use App\Http\Controllers\TaskDependencyController;
 use App\Http\Controllers\BudgetController;
 use App\Http\Controllers\CostItemController;
 use App\Http\Controllers\ExpenseController;
+use App\Http\Controllers\NotificationController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('v1')->group(function (): void {
@@ -48,6 +49,10 @@ Route::prefix('v1')->group(function (): void {
         Route::post('/me/switch-project', [MeController::class, 'switchProject'])->middleware(['company']);
         Route::put('/user/preferences', [MeController::class, 'updatePreferences']);
         Route::post('/user/expo-token', [MeController::class, 'updateExpoToken']);
+
+        // Notifications
+        Route::get('/notifications', [NotificationController::class, 'index']);
+        Route::patch('/notifications/{id}/read', [NotificationController::class, 'markAsRead']);
 
         // Admin-only RBAC management (guard sanctum + contexto de empresa)
         Route::prefix('admin')->middleware(['company'])->group(function (): void {
