@@ -3,11 +3,15 @@
 namespace App\Providers;
 
 use App\Models\Contractor;
+use App\Models\CostItem;
 use App\Models\Document;
+use App\Models\Expense;
 use App\Models\Phase;
 use App\Models\Project;
 use App\Models\Task;
 use App\Observers\AuditLogObserver;
+use App\Observers\CostItemObserver;
+use App\Observers\ExpenseObserver;
 use App\Observers\TaskObserver;
 use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Cache\RateLimiting\Limit;
@@ -32,6 +36,10 @@ class AppServiceProvider extends ServiceProvider
     {
         // Register observers
         Task::observe(TaskObserver::class);
+        
+        // Register PVxRV cache observers
+        Expense::observe(ExpenseObserver::class);
+        CostItem::observe(CostItemObserver::class);
 
         // Register audit log observers for main models
         Project::observe(AuditLogObserver::class);

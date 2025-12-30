@@ -434,5 +434,275 @@ class ExpenseControllerTest extends TestCase
             ->assertJsonCount(1, 'data')
             ->assertJsonPath('data.0.id', $expenseInRange->id);
     }
+
+    public function test_pvxr_endpoint_requer_permissao(): void
+    {
+        $user = User::factory()->create();
+        $company = Company::query()->create(['name' => 'Test Company']);
+        $user->companies()->attach($company->id);
+        $project = Project::factory()->create(['company_id' => $company->id]);
+        $user->projects()->attach($project->id, ['role' => 'Viewer']);
+
+        Sanctum::actingAs($user);
+
+        $this->getJson('/api/v1/projects/'.$project->id.'/pvxr', [
+            'X-Company-Id' => $company->id,
+        ])
+            ->assertStatus(403);
+    }
+
+    public function test_pvxr_calcula_corretamente_por_cost_item(): void
+    {
+        $user = User::factory()->create();
+        $company = Company::query()->create(['name' => 'Test Company']);
+        $user->companies()->attach($company->id);
+        app(\Spatie\Permission\PermissionRegistrar::class)->setPermissionsTeamId($company->id);
+        $user->assignRole(SystemRole::Financeiro->value);
+        $project = Project::factory()->create(['company_id' => $company->id]);
+        $user->projects()->attach($project->id, ['role' => 'Viewer']);
+
+        $budget = Budget::factory()->create([
+            'company_id' => $company->id,
+            'project_id' => $project->id,
+            'total_planned' => 100000.00,
+        ]);
+
+        $costItem1 = CostItem::factory()->create([
+            'budget_id' => $budget->id,
+            'planned_amount' => 50000.00,
+            'name' => 'Material de Construção',
+        ]);
+
+        $costItem2 = CostItem::factory()->create([
+            'budget_id' => $budget->id,
+            'planned_amount' => 30000.00,
+            'name' => 'Mão de Obra',
+        ]);
+
+        // Create approved expenses
+        Expense::factory()->create([
+            'project_id' => $project->id,
+            'cost_item_id' => $costItem1->id,
+            'amount' => 45000.00,
+            'status' => ExpenseStatus::approved,
+        ]);
+
+        Expense::factory()->create([
+            'project_id' => $project->id,
+            'cost_item_id' => $costItem1->id,
+            'amount' => 3000.00,
+            'status' => ExpenseStatus::approved,
+        ]);
+
+        Expense::factory()->create([
+            'project_id' => $project->id,
+            'cost_item_id' => $costItem2->id,
+            'amount' => 25000.00,
+            'status' => ExpenseStatus::approved,
+        ]);
+
+        // Draft expense should not be counted
+        Expense::factory()->create([
+            'project_id' => $project->id,
+            'cost_item_id' => $costItem1->id,
+            'amount' => 10000.00,
+            'status' => ExpenseStatus::draft,
+        ]);
+
+        Sanctum::actingAs($user);
+
+        $response = $this->getJson('/api/v1/projects/'.$project->id.'/pvxr', [
+            'X-Company-Id' => $company->id,
+        ])
+            ->assertOk()
+            ->assertJsonStructure([
+                'data' => [
+                    'by_cost_item' => [
+                        '*' => [
+                            'cost_item_id',
+                            'cost_item_name',
+                            'planned',
+                            'realized',
+                            'variance',
+                            'variance_percentage',
+                        ],
+                    ],
+                    'by_category',
+                    'total' => [
+                        'planned',
+                        'realized',
+                        'variance',
+                        'variance_percentage',
+                    ],
+                ],
+            ]);
+
+        $byCostItem = $response->json('data.by_cost_item');
+        
+        // Find cost_item1 in response
+        $item1 = collect($byCostItem)->firstWhere('cost_item_id', $costItem1->id);
+        $this->assertNotNull($item1);
+        $this->assertEquals(50000.00, $item1['planned']);
+        $this->assertEquals(48000.00, $item1['realized']); // 45000 + 3000
+        $this->assertEquals(2000.00, $item1['variance']); // 50000 - 48000
+        $this->assertEquals(4.00, $item1['variance_percentage']); // (2000/50000)*100
+
+        // Find cost_item2 in response
+        $item2 = collect($byCostItem)->firstWhere('cost_item_id', $costItem2->id);
+        $this->assertNotNull($item2);
+        $this->assertEquals(30000.00, $item2['planned']);
+        $this->assertEquals(25000.00, $item2['realized']);
+        $this->assertEquals(5000.00, $item2['variance']); // 30000 - 25000
+        $this->assertEquals(16.67, round($item2['variance_percentage'], 2)); // (5000/30000)*100
+
+        // Check total
+        $total = $response->json('data.total');
+        $this->assertEquals(80000.00, $total['planned']); // 50000 + 30000
+        $this->assertEquals(73000.00, $total['realized']); // 48000 + 25000
+        $this->assertEquals(7000.00, $total['variance']); // 80000 - 73000
+    }
+
+    public function test_pvxr_calcula_corretamente_por_category(): void
+    {
+        $user = User::factory()->create();
+        $company = Company::query()->create(['name' => 'Test Company']);
+        $user->companies()->attach($company->id);
+        app(\Spatie\Permission\PermissionRegistrar::class)->setPermissionsTeamId($company->id);
+        $user->assignRole(SystemRole::Financeiro->value);
+        $project = Project::factory()->create(['company_id' => $company->id]);
+        $user->projects()->attach($project->id, ['role' => 'Viewer']);
+
+        $budget = Budget::factory()->create([
+            'company_id' => $company->id,
+            'project_id' => $project->id,
+            'total_planned' => 100000.00,
+        ]);
+
+        $costItem1 = CostItem::factory()->create([
+            'budget_id' => $budget->id,
+            'planned_amount' => 40000.00,
+            'category' => 'Materiais',
+        ]);
+
+        $costItem2 = CostItem::factory()->create([
+            'budget_id' => $budget->id,
+            'planned_amount' => 30000.00,
+            'category' => 'Materiais',
+        ]);
+
+        $costItem3 = CostItem::factory()->create([
+            'budget_id' => $budget->id,
+            'planned_amount' => 20000.00,
+            'category' => 'Serviços',
+        ]);
+
+        Expense::factory()->create([
+            'project_id' => $project->id,
+            'cost_item_id' => $costItem1->id,
+            'amount' => 35000.00,
+            'status' => ExpenseStatus::approved,
+        ]);
+
+        Expense::factory()->create([
+            'project_id' => $project->id,
+            'cost_item_id' => $costItem2->id,
+            'amount' => 25000.00,
+            'status' => ExpenseStatus::approved,
+        ]);
+
+        Expense::factory()->create([
+            'project_id' => $project->id,
+            'cost_item_id' => $costItem3->id,
+            'amount' => 18000.00,
+            'status' => ExpenseStatus::approved,
+        ]);
+
+        Sanctum::actingAs($user);
+
+        $response = $this->getJson('/api/v1/projects/'.$project->id.'/pvxr', [
+            'X-Company-Id' => $company->id,
+        ])
+            ->assertOk();
+
+        $byCategory = $response->json('data.by_category');
+        
+        // Find Materiais category
+        $materiais = collect($byCategory)->firstWhere('category', 'Materiais');
+        $this->assertNotNull($materiais);
+        $this->assertEquals(70000.00, $materiais['planned']); // 40000 + 30000
+        $this->assertEquals(60000.00, $materiais['realized']); // 35000 + 25000
+        $this->assertEquals(10000.00, $materiais['variance']); // 70000 - 60000
+
+        // Find Serviços category
+        $servicos = collect($byCategory)->firstWhere('category', 'Serviços');
+        $this->assertNotNull($servicos);
+        $this->assertEquals(20000.00, $servicos['planned']);
+        $this->assertEquals(18000.00, $servicos['realized']);
+        $this->assertEquals(2000.00, $servicos['variance']); // 20000 - 18000
+    }
+
+    public function test_pvxr_retorna_vazio_quando_nao_ha_budget(): void
+    {
+        $user = User::factory()->create();
+        $company = Company::query()->create(['name' => 'Test Company']);
+        $user->companies()->attach($company->id);
+        app(\Spatie\Permission\PermissionRegistrar::class)->setPermissionsTeamId($company->id);
+        $user->assignRole(SystemRole::Financeiro->value);
+        $project = Project::factory()->create(['company_id' => $company->id]);
+        $user->projects()->attach($project->id, ['role' => 'Viewer']);
+
+        Sanctum::actingAs($user);
+
+        $response = $this->getJson('/api/v1/projects/'.$project->id.'/pvxr', [
+            'X-Company-Id' => $company->id,
+        ])
+            ->assertOk()
+            ->assertJson([
+                'data' => [
+                    'by_cost_item' => [],
+                    'by_category' => [],
+                    'total' => [
+                        'planned' => 0,
+                        'realized' => 0,
+                        'variance' => 0,
+                        'variance_percentage' => 0,
+                    ],
+                ],
+            ]);
+    }
+
+    public function test_pvxr_usa_cache_redis(): void
+    {
+        $user = User::factory()->create();
+        $company = Company::query()->create(['name' => 'Test Company']);
+        $user->companies()->attach($company->id);
+        app(\Spatie\Permission\PermissionRegistrar::class)->setPermissionsTeamId($company->id);
+        $user->assignRole(SystemRole::Financeiro->value);
+        $project = Project::factory()->create(['company_id' => $company->id]);
+        $user->projects()->attach($project->id, ['role' => 'Viewer']);
+
+        $budget = Budget::factory()->create([
+            'company_id' => $company->id,
+            'project_id' => $project->id,
+            'total_planned' => 100000.00,
+        ]);
+
+        Sanctum::actingAs($user);
+
+        // First request - should calculate
+        $response1 = $this->getJson('/api/v1/projects/'.$project->id.'/pvxr', [
+            'X-Company-Id' => $company->id,
+        ])
+            ->assertOk();
+
+        // Second request - should use cache
+        $response2 = $this->getJson('/api/v1/projects/'.$project->id.'/pvxr', [
+            'X-Company-Id' => $company->id,
+        ])
+            ->assertOk();
+
+        // Both should return same data
+        $this->assertEquals($response1->json(), $response2->json());
+    }
 }
 

@@ -2,7 +2,9 @@
 
 namespace Tests\Unit;
 
+use App\Models\Budget;
 use App\Models\CostItem;
+use App\Models\Project;
 use App\Models\PurchaseOrder;
 use App\Models\PurchaseOrderItem;
 use App\Models\PurchaseRequestItem;
@@ -123,8 +125,22 @@ class PurchaseOrderItemTest extends TestCase
             'total' => 0,
         ]);
 
+        // Get or create project and budget
+        $project = $purchaseOrder->purchaseRequest->project ?? Project::factory()->create();
+        $budget = $project->budget ?? Budget::factory()->create([
+            'project_id' => $project->id,
+            'total_planned' => 100000.00,
+        ]);
+
+        // Create cost item with valid budget relationship
+        $costItem = CostItem::factory()->create([
+            'budget_id' => $budget->id,
+            'planned_amount' => 50000.00,
+        ]);
+
         $item = PurchaseOrderItem::factory()->create([
             'purchase_order_id' => $purchaseOrder->id,
+            'cost_item_id' => $costItem->id,
             'quantity' => 10,
             'unit_price' => 100.00,
         ]);
@@ -140,14 +156,34 @@ class PurchaseOrderItemTest extends TestCase
             'total' => 0,
         ]);
 
+        // Get or create project and budget
+        $project = $purchaseOrder->purchaseRequest->project ?? Project::factory()->create();
+        $budget = $project->budget ?? Budget::factory()->create([
+            'project_id' => $project->id,
+            'total_planned' => 100000.00,
+        ]);
+
+        // Create cost items with valid budget relationship
+        $costItem1 = CostItem::factory()->create([
+            'budget_id' => $budget->id,
+            'planned_amount' => 50000.00,
+        ]);
+
+        $costItem2 = CostItem::factory()->create([
+            'budget_id' => $budget->id,
+            'planned_amount' => 30000.00,
+        ]);
+
         $item1 = PurchaseOrderItem::factory()->create([
             'purchase_order_id' => $purchaseOrder->id,
+            'cost_item_id' => $costItem1->id,
             'quantity' => 10,
             'unit_price' => 100.00,
         ]);
 
         $item2 = PurchaseOrderItem::factory()->create([
             'purchase_order_id' => $purchaseOrder->id,
+            'cost_item_id' => $costItem2->id,
             'quantity' => 5,
             'unit_price' => 50.00,
         ]);

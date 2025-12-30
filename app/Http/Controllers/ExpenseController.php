@@ -5,10 +5,14 @@ namespace App\Http\Controllers;
 use App\Http\Requests\Expense\StoreExpenseRequest;
 use App\Http\Requests\Expense\UpdateExpenseRequest;
 use App\Http\Resources\ExpenseResource;
+use App\Models\CostItem;
 use App\Models\Expense;
 use App\Models\Project;
+use App\Enums\ExpenseStatus;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 
 /**
@@ -355,6 +359,196 @@ class ExpenseController extends Controller
         abort_unless(Storage::disk($disk)->exists($expense->receipt_path), 404, 'Arquivo não encontrado no storage');
 
         return Storage::disk($disk)->response($expense->receipt_path);
+    }
+
+    /**
+     * @OA\Get(
+     *     path="/api/v1/projects/{project}/pvxr",
+     *     summary="Calcular Previsto vs Realizado (PVxRV)",
+     *     description="Retorna cálculo de Previsto vs Realizado agrupado por cost_item, category e total do projeto",
+     *     tags={"Expenses"},
+     *     security={{"sanctum":{}}},
+     *     @OA\Parameter(name="X-Company-Id", in="header", required=true, @OA\Schema(type="integer")),
+     *     @OA\Parameter(name="project", in="path", required=true, @OA\Schema(type="integer")),
+     *     @OA\Parameter(name="group_by", in="query", required=false, @OA\Schema(type="string", enum={"cost_item", "category", "total"}), description="Agrupar por: cost_item, category ou total (padrão: retorna todos)"),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Cálculo PVxRV",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(
+     *                 property="data",
+     *                 type="object",
+     *                 @OA\Property(
+     *                     property="by_cost_item",
+     *                     type="array",
+     *                     @OA\Items(
+     *                         type="object",
+     *                         @OA\Property(property="cost_item_id", type="integer"),
+     *                         @OA\Property(property="cost_item_name", type="string"),
+     *                         @OA\Property(property="planned", type="number", format="float"),
+     *                         @OA\Property(property="realized", type="number", format="float"),
+     *                         @OA\Property(property="variance", type="number", format="float"),
+     *                         @OA\Property(property="variance_percentage", type="number", format="float")
+     *                     )
+     *                 ),
+     *                 @OA\Property(
+     *                     property="by_category",
+     *                     type="array",
+     *                     @OA\Items(
+     *                         type="object",
+     *                         @OA\Property(property="category", type="string"),
+     *                         @OA\Property(property="planned", type="number", format="float"),
+     *                         @OA\Property(property="realized", type="number", format="float"),
+     *                         @OA\Property(property="variance", type="number", format="float"),
+     *                         @OA\Property(property="variance_percentage", type="number", format="float")
+     *                     )
+     *                 ),
+     *                 @OA\Property(
+     *                     property="total",
+     *                     type="object",
+     *                     @OA\Property(property="planned", type="number", format="float"),
+     *                     @OA\Property(property="realized", type="number", format="float"),
+     *                     @OA\Property(property="variance", type="number", format="float"),
+     *                     @OA\Property(property="variance_percentage", type="number", format="float")
+     *                 )
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(response=403, description="Sem permissão"),
+     *     @OA\Response(response=404, description="Projeto não encontrado")
+     * )
+     */
+    public function pvxr(Request $request, Project $project): JsonResponse
+    {
+        /** @var \App\Models\User $user */
+        $user = $request->user();
+        $companyId = (int) $request->header('X-Company-Id');
+
+        $this->checkBudgetPermission($user);
+        abort_unless($companyId && $user->companies()->whereKey($companyId)->exists(), 403);
+        abort_unless($project->company_id === $companyId, 403);
+        abort_unless($user->projects()->whereKey($project->id)->exists(), 403);
+
+        // Cache key with project ID
+        $cacheKey = "project_pvxr:{$project->id}";
+        
+        // Cache for 1 hour (3600 seconds)
+        $data = Cache::remember($cacheKey, 3600, function () use ($project) {
+            return $this->calculatePvxr($project);
+        });
+
+        return response()->json(['data' => $data]);
+    }
+
+    /**
+     * Calculate PVxRV data for a project.
+     * This method is separated to allow reuse in jobs and cache invalidation.
+     *
+     * @param Project $project
+     * @return array
+     */
+    public function calculatePvxr(Project $project): array
+    {
+        // Get budget for the project
+        $budget = $project->budget;
+        if (!$budget) {
+            return [
+                'by_cost_item' => [],
+                'by_category' => [],
+                'total' => [
+                    'planned' => 0,
+                    'realized' => 0,
+                    'variance' => 0,
+                    'variance_percentage' => 0,
+                ],
+            ];
+        }
+
+        // Calculate realized expenses (only approved)
+        $realizedExpenses = Expense::query()
+            ->where('project_id', $project->id)
+            ->where('status', ExpenseStatus::approved)
+            ->select('cost_item_id', DB::raw('SUM(amount) as realized'))
+            ->groupBy('cost_item_id')
+            ->get()
+            ->keyBy('cost_item_id');
+
+        // Get all cost items with their planned amounts
+        $costItems = CostItem::query()
+            ->where('budget_id', $budget->id)
+            ->get();
+
+        // Calculate by cost_item
+        $byCostItem = [];
+        foreach ($costItems as $costItem) {
+            $realized = (float) ($realizedExpenses->get($costItem->id)->realized ?? 0);
+            $planned = (float) $costItem->planned_amount;
+            $variance = $planned - $realized;
+            $variancePercentage = $planned > 0 ? ($variance / $planned) * 100 : 0;
+
+            $byCostItem[] = [
+                'cost_item_id' => $costItem->id,
+                'cost_item_name' => $costItem->name,
+                'planned' => round($planned, 2),
+                'realized' => round($realized, 2),
+                'variance' => round($variance, 2),
+                'variance_percentage' => round($variancePercentage, 2),
+            ];
+        }
+
+        // Calculate by category
+        $byCategory = [];
+        $categoryData = DB::table('cost_items')
+            ->where('budget_id', $budget->id)
+            ->select('category', DB::raw('SUM(planned_amount) as planned'))
+            ->groupBy('category')
+            ->get();
+
+        foreach ($categoryData as $categoryRow) {
+            $category = $categoryRow->category ?? 'Sem categoria';
+            $planned = (float) $categoryRow->planned;
+
+            // Calculate realized for this category
+            $realized = (float) Expense::query()
+                ->where('project_id', $project->id)
+                ->where('status', ExpenseStatus::approved)
+                ->whereHas('costItem', function ($query) use ($category) {
+                    $query->where('category', $category);
+                })
+                ->sum('amount');
+
+            $variance = $planned - $realized;
+            $variancePercentage = $planned > 0 ? ($variance / $planned) * 100 : 0;
+
+            $byCategory[] = [
+                'category' => $category,
+                'planned' => round($planned, 2),
+                'realized' => round($realized, 2),
+                'variance' => round($variance, 2),
+                'variance_percentage' => round($variancePercentage, 2),
+            ];
+        }
+
+        // Calculate total
+        $totalPlanned = (float) $costItems->sum('planned_amount');
+        $totalRealized = (float) Expense::query()
+            ->where('project_id', $project->id)
+            ->where('status', ExpenseStatus::approved)
+            ->sum('amount');
+        $totalVariance = $totalPlanned - $totalRealized;
+        $totalVariancePercentage = $totalPlanned > 0 ? ($totalVariance / $totalPlanned) * 100 : 0;
+
+        return [
+            'by_cost_item' => $byCostItem,
+            'by_category' => $byCategory,
+            'total' => [
+                'planned' => round($totalPlanned, 2),
+                'realized' => round($totalRealized, 2),
+                'variance' => round($totalVariance, 2),
+                'variance_percentage' => round($totalVariancePercentage, 2),
+            ],
+        ];
     }
 }
 

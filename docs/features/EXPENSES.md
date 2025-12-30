@@ -286,7 +286,14 @@ Análise:
   - % Executado: 35%
 ```
 
-**Implementação Futura**: Endpoint dedicado para relatório PVxRV.
+**Endpoint Implementado**: `GET /api/v1/projects/{project}/pvxr`
+
+Retorna cálculo completo de Previsto vs Realizado agrupado por:
+- **cost_item**: Detalhamento por item de custo
+- **category**: Agrupamento por categoria
+- **total**: Totais do projeto
+
+Cada agrupamento inclui: `planned`, `realized`, `variance`, `variance_percentage`.
 
 ---
 
@@ -409,6 +416,65 @@ GET /api/v1/expenses/{expense}/receipt
 
 **Headers:**
 - `Content-Type`: Tipo do arquivo (application/pdf, image/jpeg, etc.)
+
+---
+
+#### 7. Calcular Previsto vs Realizado (PVxRV)
+
+```http
+GET /api/v1/projects/{project}/pvxr
+```
+
+**Descrição:** Retorna cálculo de Previsto vs Realizado agrupado por cost_item, category e total do projeto.
+
+**Resposta:**
+```json
+{
+  "data": {
+    "by_cost_item": [
+      {
+        "cost_item_id": 1,
+        "cost_item_name": "Cimento",
+        "planned": 10000.00,
+        "realized": 3500.00,
+        "variance": 6500.00,
+        "variance_percentage": 65.00
+      }
+    ],
+    "by_category": [
+      {
+        "category": "Materiais",
+        "planned": 50000.00,
+        "realized": 30000.00,
+        "variance": 20000.00,
+        "variance_percentage": 40.00
+      }
+    ],
+    "total": {
+      "planned": 100000.00,
+      "realized": 75000.00,
+      "variance": 25000.00,
+      "variance_percentage": 25.00
+    }
+  }
+}
+```
+
+**Campos:**
+- `planned`: Valor planejado (soma de `CostItem.planned_amount`)
+- `realized`: Valor realizado (soma de `Expense.amount` onde `status='approved'`)
+- `variance`: Diferença (planned - realized)
+- `variance_percentage`: Percentual de variação ((variance / planned) * 100)
+
+**Cache:**
+- Resposta é cacheada no Redis por 1 hora
+- Cache é invalidado automaticamente quando Expense ou CostItem são criados/atualizados/deletados
+- Job noturno recalcula todos os projetos às 02:00 AM
+
+**Códigos HTTP:**
+- `200` - Sucesso
+- `403` - Sem permissão
+- `404` - Projeto não encontrado
 
 ---
 
@@ -919,12 +985,11 @@ Embora validações sejam feitas no backend, é recomendado validar no frontend 
 
 ### Planejadas
 
-1. **Relatório PVxRV**: Endpoint dedicado para análise Planejado vs Realizado
-2. **Categorização**: Adicionar campo `category` para classificação adicional
-3. **Fornecedor**: Campo `supplier_id` para vincular a fornecedores
-4. **Nota Fiscal**: Campos adicionais para informações fiscais
-5. **Aprovação em Lote**: Endpoint para aprovar múltiplas despesas
-6. **Exportação**: Exportar despesas para CSV/PDF
+1. **Categorização**: Adicionar campo `category` para classificação adicional
+2. **Fornecedor**: Campo `supplier_id` para vincular a fornecedores
+3. **Nota Fiscal**: Campos adicionais para informações fiscais
+4. **Aprovação em Lote**: Endpoint para aprovar múltiplas despesas
+5. **Exportação**: Exportar despesas para CSV/PDF
 
 ### Considerações para Implementação
 
@@ -968,7 +1033,7 @@ Embora validações sejam feitas no backend, é recomendado validar no frontend 
 
 ---
 
-**Última atualização:** 2025-12-29  
+**Última atualização:** 2025-12-30  
 **Versão da API:** v1  
 **Status:** ✅ Implementado e Testado
 

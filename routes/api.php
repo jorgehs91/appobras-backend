@@ -133,6 +133,7 @@ Route::prefix('v1')->group(function (): void {
             // Expenses (escopo project)
             Route::get('/projects/{project}/expenses', [ExpenseController::class, 'index']);
             Route::post('/projects/{project}/expenses', [ExpenseController::class, 'store']);
+            Route::get('/projects/{project}/pvxr', [ExpenseController::class, 'pvxr']);
             Route::get('/expenses/{expense}', [ExpenseController::class, 'show']);
             Route::match(['put', 'patch'], '/expenses/{expense}', [ExpenseController::class, 'update']);
             Route::delete('/expenses/{expense}', [ExpenseController::class, 'destroy']);

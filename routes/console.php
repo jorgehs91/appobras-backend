@@ -15,3 +15,10 @@ Schedule::command('alerts:generate')
     ->onOneServer()
     ->withoutOverlapping()
     ->runInBackground();
+
+// Schedule PVxRV recalculation to run nightly at 2:00 AM
+// This ensures cache is refreshed with fresh calculations
+Schedule::job(new \App\Jobs\RecalculatePvxrJob())
+    ->dailyAt('02:00')
+    ->onOneServer()
+    ->withoutOverlapping();
