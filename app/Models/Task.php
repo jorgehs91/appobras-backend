@@ -112,6 +112,14 @@ class Task extends Model
     }
 
     /**
+     * Get the comments for this task.
+     */
+    public function comments()
+    {
+        return $this->hasMany(TaskComment::class);
+    }
+
+    /**
      * Calculate progress percentage based on status.
      * Mapping: backlog=0, in_progress=50, in_review=90, done=100, canceled=0
      */
