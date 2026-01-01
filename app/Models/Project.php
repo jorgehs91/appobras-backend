@@ -135,6 +135,14 @@ class Project extends Model
     }
 
     /**
+     * Get the licenses for the project.
+     */
+    public function licenses()
+    {
+        return $this->hasMany(License::class);
+    }
+
+    /**
      * Calculate progress percentage based on active phases.
      * Returns average of phase progress (only active phases).
      */

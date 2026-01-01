@@ -107,4 +107,12 @@ class File extends Model
     {
         return $query->where('category', $category);
     }
+
+    /**
+     * Get the licenses associated with this file.
+     */
+    public function licenses()
+    {
+        return $this->hasMany(License::class);
+    }
 }
