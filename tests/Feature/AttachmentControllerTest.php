@@ -10,6 +10,7 @@ use App\Models\Task;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Storage;
 use Laravel\Sanctum\Sanctum;
 use Tests\TestCase;
@@ -53,6 +54,8 @@ class AttachmentControllerTest extends TestCase
 
     public function test_can_upload_attachment(): void
     {
+        // Ensure we use 'local' disk for tests
+        Config::set('filesystems.files_disk', 'local');
         Storage::fake('local');
 
         $user = User::factory()->create();
@@ -91,7 +94,8 @@ class AttachmentControllerTest extends TestCase
 
         // Verify file was stored
         $attachment = File::query()->where('name', 'attachment.pdf')->first();
-        Storage::disk('local')->assertExists($attachment->path);
+        $disk = config('filesystems.files_disk', 'local');
+        Storage::disk($disk)->assertExists($attachment->path);
     }
 
     public function test_can_show_attachment(): void
@@ -130,6 +134,7 @@ class AttachmentControllerTest extends TestCase
 
     public function test_can_download_attachment(): void
     {
+        Config::set('filesystems.files_disk', 'local');
         Storage::fake('local');
 
         $user = User::factory()->create();
@@ -147,8 +152,9 @@ class AttachmentControllerTest extends TestCase
             'company_id' => $company->id,
         ]);
 
+        $disk = config('filesystems.files_disk', 'local');
         $file = UploadedFile::fake()->create('attachment.pdf', 1000);
-        $path = $file->store("attachments/task-{$task->id}", 'local');
+        $path = $file->store("attachments/task-{$task->id}", $disk);
 
         $attachment = File::factory()->create([
             'fileable_type' => Task::class,
@@ -170,6 +176,7 @@ class AttachmentControllerTest extends TestCase
 
     public function test_can_delete_attachment(): void
     {
+        Config::set('filesystems.files_disk', 'local');
         Storage::fake('local');
 
         $user = User::factory()->create();
@@ -188,8 +195,9 @@ class AttachmentControllerTest extends TestCase
         ]);
 
         // Create a fake file
+        $disk = config('filesystems.files_disk', 'local');
         $file = UploadedFile::fake()->create('attachment.pdf', 1000);
-        $path = $file->store("attachments/task-{$task->id}", 'local');
+        $path = $file->store("attachments/task-{$task->id}", $disk);
 
         $attachment = File::factory()->create([
             'fileable_type' => Task::class,
@@ -214,6 +222,7 @@ class AttachmentControllerTest extends TestCase
 
     public function test_attachment_uploader_can_delete_own_attachment(): void
     {
+        Config::set('filesystems.files_disk', 'local');
         Storage::fake('local');
 
         $uploader = User::factory()->create();
@@ -231,8 +240,9 @@ class AttachmentControllerTest extends TestCase
             'company_id' => $company->id,
         ]);
 
+        $disk = config('filesystems.files_disk', 'local');
         $file = UploadedFile::fake()->create('attachment.pdf', 1000);
-        $path = $file->store("attachments/task-{$task->id}", 'local');
+        $path = $file->store("attachments/task-{$task->id}", $disk);
 
         $attachment = File::factory()->create([
             'fileable_type' => Task::class,
@@ -252,6 +262,7 @@ class AttachmentControllerTest extends TestCase
 
     public function test_cannot_upload_attachment_without_project_membership(): void
     {
+        Config::set('filesystems.files_disk', 'local');
         Storage::fake('local');
 
         $user = User::factory()->create();
@@ -281,6 +292,7 @@ class AttachmentControllerTest extends TestCase
 
     public function test_cannot_delete_attachment_from_different_company(): void
     {
+        Config::set('filesystems.files_disk', 'local');
         Storage::fake('local');
 
         $user = User::factory()->create();
@@ -298,8 +310,9 @@ class AttachmentControllerTest extends TestCase
             'company_id' => $company2->id,
         ]);
 
+        $disk = config('filesystems.files_disk', 'local');
         $file = UploadedFile::fake()->create('attachment.pdf', 1000);
-        $path = $file->store("attachments/task-{$task->id}", 'local');
+        $path = $file->store("attachments/task-{$task->id}", $disk);
 
         $attachment = File::factory()->create([
             'fileable_type' => Task::class,
@@ -318,6 +331,7 @@ class AttachmentControllerTest extends TestCase
 
     public function test_file_is_deleted_from_storage_on_destroy(): void
     {
+        Config::set('filesystems.files_disk', 'local');
         Storage::fake('local');
 
         $user = User::factory()->create();
@@ -335,8 +349,9 @@ class AttachmentControllerTest extends TestCase
             'company_id' => $company->id,
         ]);
 
+        $disk = config('filesystems.files_disk', 'local');
         $file = UploadedFile::fake()->create('attachment.pdf', 1000);
-        $path = $file->store("attachments/task-{$task->id}", 'local');
+        $path = $file->store("attachments/task-{$task->id}", $disk);
 
         $attachment = File::factory()->create([
             'fileable_type' => Task::class,
@@ -349,7 +364,8 @@ class AttachmentControllerTest extends TestCase
         ]);
 
         // Verify file exists before deletion
-        Storage::disk('local')->assertExists($path);
+        $disk = config('filesystems.files_disk', 'local');
+        Storage::disk($disk)->assertExists($path);
 
         $response = $this->withHeader('X-Company-Id', $company->id)
             ->deleteJson("/api/v1/attachments/{$attachment->id}");
@@ -357,11 +373,12 @@ class AttachmentControllerTest extends TestCase
         $response->assertStatus(204);
 
         // Verify file was deleted from storage
-        Storage::disk('local')->assertMissing($path);
+        Storage::disk($disk)->assertMissing($path);
     }
 
     public function test_validates_file_upload_requirements(): void
     {
+        Config::set('filesystems.files_disk', 'local');
         Storage::fake('local');
 
         $user = User::factory()->create();
@@ -389,6 +406,7 @@ class AttachmentControllerTest extends TestCase
 
     public function test_validates_file_size_limit(): void
     {
+        Config::set('filesystems.files_disk', 'local');
         Storage::fake('local');
 
         $user = User::factory()->create();
