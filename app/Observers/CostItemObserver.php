@@ -48,7 +48,18 @@ class CostItemObserver
         if ($budget && $budget->project_id) {
             $cacheKey = "project_pvxr:{$budget->project_id}";
             Cache::forget($cacheKey);
+
+            // Also clear dashboard stats cache
+            $this->clearDashboardCache($budget->project_id);
         }
+    }
+
+    /**
+     * Clear dashboard stats cache for all users with access to the project.
+     */
+    protected function clearDashboardCache(int $projectId): void
+    {
+        \App\Http\Controllers\DashboardController::clearCacheForProject($projectId);
     }
 }
 

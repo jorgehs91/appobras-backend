@@ -46,6 +46,17 @@ class ExpenseObserver
     {
         $cacheKey = "project_pvxr:{$expense->project_id}";
         Cache::forget($cacheKey);
+
+        // Also clear dashboard stats cache for all users with access to this project
+        $this->clearDashboardCache($expense->project_id);
+    }
+
+    /**
+     * Clear dashboard stats cache for all users with access to the project.
+     */
+    protected function clearDashboardCache(int $projectId): void
+    {
+        \App\Http\Controllers\DashboardController::clearCacheForProject($projectId);
     }
 }
 

@@ -5,6 +5,7 @@ namespace App\Observers;
 use App\Enums\TaskStatus;
 use App\Models\Task;
 use App\Models\TaskDependency;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Validation\ValidationException;
 
 class TaskObserver
@@ -109,6 +110,45 @@ class TaskObserver
                 $task->completed_at = null;
             }
         }
+    }
+
+    /**
+     * Handle the Task "created" event.
+     * Clear dashboard cache when tasks are created.
+     */
+    public function created(Task $task): void
+    {
+        $this->clearDashboardCache($task);
+    }
+
+    /**
+     * Handle the Task "updated" event.
+     * Clear dashboard cache when tasks are updated (status, dates, etc.).
+     */
+    public function updated(Task $task): void
+    {
+        $this->clearDashboardCache($task);
+    }
+
+    /**
+     * Handle the Task "deleted" event.
+     * Clear dashboard cache when tasks are deleted.
+     */
+    public function deleted(Task $task): void
+    {
+        $this->clearDashboardCache($task);
+    }
+
+    /**
+     * Clear dashboard stats cache for all users with access to the task's project.
+     */
+    protected function clearDashboardCache(Task $task): void
+    {
+        if (!$task->project_id) {
+            return;
+        }
+
+        \App\Http\Controllers\DashboardController::clearCacheForProject($task->project_id);
     }
 
 }
