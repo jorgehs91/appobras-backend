@@ -77,6 +77,19 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Files Disk (Unified)
+    |--------------------------------------------------------------------------
+    |
+    | Define qual disk deve ser usado para armazenar arquivos (documents, attachments, etc).
+    | Por padrão usa 'local' (armazenamento no servidor).
+    | Para usar S3, defina FILES_DISK=s3 no .env
+    |
+    */
+
+    'files_disk' => env('FILES_DISK', 'local'),
+
+    /*
+    |--------------------------------------------------------------------------
     | Symbolic Links
     |--------------------------------------------------------------------------
     |

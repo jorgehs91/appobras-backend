@@ -19,7 +19,7 @@ class AuthServiceProvider extends ServiceProvider
         \App\Models\Phase::class => \App\Policies\PhasePolicy::class,
         \App\Models\Task::class => \App\Policies\TaskPolicy::class,
         \App\Models\Contractor::class => \App\Policies\ContractorPolicy::class,
-        \App\Models\Document::class => \App\Policies\DocumentPolicy::class,
+        \App\Models\File::class => \App\Policies\DocumentPolicy::class,
         \App\Models\Project::class => \App\Policies\ProjectMemberPolicy::class,
         \App\Models\PurchaseRequest::class => \App\Policies\PurchaseRequestPolicy::class,
     ];

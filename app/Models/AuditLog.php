@@ -85,12 +85,12 @@ class AuditLog extends Model
                             ->where('project_id', $projectId);
                     });
             })
-            // Document belongs to project - using subquery
+            // File belongs to project (polymorphic) - using subquery
             ->orWhere(function ($subQ) use ($projectId) {
-                $subQ->where('auditable_type', Document::class)
-                    ->whereIn('auditable_id', function ($docQuery) use ($projectId) {
-                        $docQuery->select('id')
-                            ->from('documents')
+                $subQ->where('auditable_type', File::class)
+                    ->whereIn('auditable_id', function ($fileQuery) use ($projectId) {
+                        $fileQuery->select('id')
+                            ->from('files')
                             ->where('project_id', $projectId);
                     });
             });
@@ -148,12 +148,12 @@ class AuditLog extends Model
                             ->where('company_id', $companyId);
                     });
             })
-            // Document belongs to company - using subquery
+            // File belongs to company (polymorphic) - using subquery
             ->orWhere(function ($subQ) use ($companyId) {
-                $subQ->where('auditable_type', Document::class)
-                    ->whereIn('auditable_id', function ($docQuery) use ($companyId) {
-                        $docQuery->select('id')
-                            ->from('documents')
+                $subQ->where('auditable_type', File::class)
+                    ->whereIn('auditable_id', function ($fileQuery) use ($companyId) {
+                        $fileQuery->select('id')
+                            ->from('files')
                             ->where('company_id', $companyId);
                     });
             });

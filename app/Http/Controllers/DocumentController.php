@@ -4,11 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\Document\StoreDocumentRequest;
 use App\Http\Resources\DocumentResource;
-use App\Models\Document;
+use App\Models\File;
 use App\Models\Project;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Storage;
 
 /**
@@ -19,6 +18,18 @@ use Illuminate\Support\Facades\Storage;
  */
 class DocumentController extends Controller
 {
+    /**
+     * Retorna o disk configurado para armazenar arquivos.
+     * Por padrão usa 'local', mas pode ser alterado via env FILES_DISK.
+     * Para usar S3, defina FILES_DISK=s3 no .env
+     *
+     * @return string
+     */
+    protected function getFilesDisk(): string
+    {
+        return config('filesystems.files_disk', 'local');
+    }
+
     /**
      * @OA\Get(
      *     path="/api/v1/projects/{project}/documents",
@@ -40,8 +51,10 @@ class DocumentController extends Controller
         abort_unless($project->company_id === $companyId, 403);
         abort_unless($user->projects()->whereKey($project->id)->exists(), 403);
 
-        $documents = Document::query()
-            ->where('project_id', $project->id)
+        $documents = File::query()
+            ->where('fileable_type', Project::class)
+            ->where('fileable_id', $project->id)
+            ->where('category', 'document')
             ->with('uploader')
             ->orderByDesc('created_at')
             ->get();
@@ -90,6 +103,7 @@ class DocumentController extends Controller
         /** @var \App\Models\User $user */
         $user = $request->user();
         $companyId = (int) $request->header('X-Company-Id');
+        $disk = $this->getFilesDisk();
 
         abort_unless($companyId && $user->companies()->whereKey($companyId)->exists(), 403);
         abort_unless($project->company_id === $companyId, 403);
@@ -99,19 +113,23 @@ class DocumentController extends Controller
         $name = $request->input('name') ?? $file->getClientOriginalName();
 
         // Store file in storage/app/documents/project-{id}
-        $path = $file->store("documents/project-{$project->id}", 'local');
+        $path = $file->store("documents/project-{$project->id}", $disk);
 
         // Generate file URL (use Storage::url() if disk is public, or signed URL if private)
-        $fileUrl = Storage::url($path);
+        $fileUrl = Storage::disk($disk)->url($path);
 
-        $document = Document::query()->create([
+        $document = File::query()->create([
+            'fileable_type' => Project::class,
+            'fileable_id' => $project->id,
             'company_id' => $companyId,
             'project_id' => $project->id,
             'name' => $name,
-            'file_path' => $path,
-            'file_url' => $fileUrl,
+            'path' => $path,
+            'url' => $fileUrl,
             'mime_type' => $file->getMimeType(),
-            'file_size' => $file->getSize(),
+            'size' => $file->getSize(),
+            'thumbnail_path' => null,
+            'category' => 'document',
             'uploaded_by' => $user->id,
         ]);
 
@@ -138,7 +156,7 @@ class DocumentController extends Controller
      *     @OA\Response(response=404, description="Documento não encontrado")
      * )
      */
-    public function show(Request $request, Document $document): JsonResponse
+    public function show(Request $request, File $document): JsonResponse
     {
         /** @var \App\Models\User $user */
         $user = $request->user();
@@ -146,6 +164,8 @@ class DocumentController extends Controller
 
         abort_unless($companyId && $user->companies()->whereKey($companyId)->exists(), 403);
         abort_unless($document->company_id === $companyId, 403);
+        abort_unless($document->category === 'document', 403);
+        abort_unless($document->fileable_type === Project::class, 403);
         abort_unless($user->projects()->whereKey($document->project_id)->exists(), 403);
 
         $document->load('uploader');
@@ -174,19 +194,22 @@ class DocumentController extends Controller
      *     @OA\Response(response=404, description="Documento não encontrado")
      * )
      */
-    public function download(Request $request, Document $document): \Symfony\Component\HttpFoundation\StreamedResponse
+    public function download(Request $request, File $document): \Symfony\Component\HttpFoundation\StreamedResponse
     {
         /** @var \App\Models\User $user */
         $user = $request->user();
         $companyId = (int) $request->header('X-Company-Id');
+        $disk = $this->getFilesDisk();
 
         abort_unless($companyId && $user->companies()->whereKey($companyId)->exists(), 403);
         abort_unless($document->company_id === $companyId, 403);
+        abort_unless($document->category === 'document', 403);
+        abort_unless($document->fileable_type === Project::class, 403);
         abort_unless($user->projects()->whereKey($document->project_id)->exists(), 403);
 
-        abort_unless(Storage::exists($document->file_path), 404, 'Arquivo não encontrado no storage');
+        abort_unless(Storage::disk($disk)->exists($document->path), 404, 'Arquivo não encontrado no storage');
 
-        return Storage::response($document->file_path, $document->name, [
+        return Storage::disk($disk)->response($document->path, $document->name, [
             'Content-Type' => $document->mime_type,
         ]);
     }
@@ -208,19 +231,22 @@ class DocumentController extends Controller
      *     @OA\Response(response=404, description="Documento não encontrado")
      * )
      */
-    public function destroy(Request $request, Document $document): JsonResponse
+    public function destroy(Request $request, File $document): JsonResponse
     {
         /** @var \App\Models\User $user */
         $user = $request->user();
         $companyId = (int) $request->header('X-Company-Id');
+        $disk = $this->getFilesDisk();
 
         abort_unless($companyId && $user->companies()->whereKey($companyId)->exists(), 403);
         abort_unless($document->company_id === $companyId, 403);
+        abort_unless($document->category === 'document', 403);
+        abort_unless($document->fileable_type === Project::class, 403);
         abort_unless($user->projects()->whereKey($document->project_id)->exists() || $document->uploaded_by === $user->id, 403);
 
         // Delete file from storage
-        if (Storage::exists($document->file_path)) {
-            Storage::delete($document->file_path);
+        if (Storage::disk($disk)->exists($document->path)) {
+            Storage::disk($disk)->delete($document->path);
         }
 
         $document->delete();
@@ -228,4 +254,3 @@ class DocumentController extends Controller
         return response()->json(null, 204);
     }
 }
-

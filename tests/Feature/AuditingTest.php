@@ -4,7 +4,6 @@ namespace Tests\Feature;
 
 use App\Models\Company;
 use App\Models\Contractor;
-use App\Models\Document;
 use App\Models\Phase;
 use App\Models\Project;
 use App\Models\Task;
@@ -162,7 +161,7 @@ class AuditingTest extends TestCase
             ->assertCreated();
 
         $documentId = $response->json('data.id');
-        $document = Document::query()->find($documentId);
+        $document = \App\Models\File::query()->find($documentId);
 
         $this->assertNotNull($document->created_by);
         $this->assertEquals($user->id, $document->created_by);

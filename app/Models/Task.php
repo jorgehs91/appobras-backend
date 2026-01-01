@@ -120,6 +120,24 @@ class Task extends Model
     }
 
     /**
+     * Get all files for this task (polymorphic).
+     */
+    public function files()
+    {
+        return $this->morphMany(File::class, 'fileable');
+    }
+
+    /**
+     * Get attachments for this task (alias for files with category='attachment').
+     * 
+     * @deprecated Use files()->where('category', 'attachment') instead
+     */
+    public function attachments()
+    {
+        return $this->files()->where('category', 'attachment');
+    }
+
+    /**
      * Calculate progress percentage based on status.
      * Mapping: backlog=0, in_progress=50, in_review=90, done=100, canceled=0
      */

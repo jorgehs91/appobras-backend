@@ -15,6 +15,7 @@ use App\Http\Controllers\ProjectMembersController;
 use App\Http\Controllers\ProjectProgressController;
 use App\Http\Controllers\TaskController;
 use App\Http\Controllers\TaskDependencyController;
+use App\Http\Controllers\AttachmentController;
 use App\Http\Controllers\BudgetController;
 use App\Http\Controllers\CostItemController;
 use App\Http\Controllers\ExpenseController;
@@ -106,6 +107,13 @@ Route::prefix('v1')->group(function (): void {
             Route::post('/projects/{project}/task-dependencies/bulk', [TaskDependencyController::class, 'storeBulk']);
             Route::put('/task-dependencies/{taskDependency}', [TaskDependencyController::class, 'update']);
             Route::delete('/task-dependencies/{taskDependency}', [TaskDependencyController::class, 'destroy']);
+
+            // Task Attachments (escopo project via task)
+            Route::get('/tasks/{task}/attachments', [AttachmentController::class, 'index']);
+            Route::post('/tasks/{task}/attachments', [AttachmentController::class, 'store']);
+            Route::get('/attachments/{attachment}', [AttachmentController::class, 'show']);
+            Route::get('/attachments/{attachment}/download', [AttachmentController::class, 'download']);
+            Route::delete('/attachments/{attachment}', [AttachmentController::class, 'destroy']);
 
             // Documents (escopo project)
             Route::get('/projects/{project}/documents', [DocumentController::class, 'index']);

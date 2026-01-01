@@ -4,7 +4,7 @@ namespace App\Providers;
 
 use App\Models\Contractor;
 use App\Models\CostItem;
-use App\Models\Document;
+use App\Models\File;
 use App\Models\Expense;
 use App\Models\Phase;
 use App\Models\Project;
@@ -45,7 +45,7 @@ class AppServiceProvider extends ServiceProvider
         Project::observe(AuditLogObserver::class);
         Phase::observe(AuditLogObserver::class);
         Task::observe(AuditLogObserver::class);
-        Document::observe(AuditLogObserver::class);
+        File::observe(AuditLogObserver::class);
         Contractor::observe(AuditLogObserver::class);
 
         RateLimiter::for('login', function (Request $request) {

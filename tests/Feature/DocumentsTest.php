@@ -3,7 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\Company;
-use App\Models\Document;
+use App\Models\File;
 use App\Models\Project;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -26,9 +26,10 @@ class DocumentsTest extends TestCase
         $project = Project::factory()->create(['company_id' => $company->id]);
         $user->projects()->attach($project->id, ['role' => 'Manager']);
 
-        Document::factory()->count(3)->create([
+        File::factory()->count(3)->document()->create([
             'company_id' => $company->id,
             'project_id' => $project->id,
+            'fileable_id' => $project->id,
             'uploaded_by' => $user->id,
         ]);
 
@@ -63,16 +64,19 @@ class DocumentsTest extends TestCase
             ->assertJsonPath('data.name', 'Test Document')
             ->assertJsonPath('data.mime_type', 'application/pdf');
 
-        $this->assertDatabaseHas('documents', [
+        $this->assertDatabaseHas('files', [
             'name' => 'Test Document',
             'project_id' => $project->id,
             'company_id' => $company->id,
+            'fileable_type' => Project::class,
+            'fileable_id' => $project->id,
+            'category' => 'document',
             'uploaded_by' => $user->id,
         ]);
 
         // Verify file was stored
-        $document = Document::query()->where('name', 'Test Document')->first();
-        Storage::disk('local')->assertExists($document->file_path);
+        $document = File::query()->where('name', 'Test Document')->first();
+        Storage::disk('local')->assertExists($document->path);
     }
 
     public function test_can_delete_document(): void
@@ -91,11 +95,12 @@ class DocumentsTest extends TestCase
         $file = UploadedFile::fake()->create('document.pdf', 1000);
         $path = $file->store("documents/project-{$project->id}", 'local');
 
-        $document = Document::factory()->create([
+        $document = File::factory()->document()->create([
             'company_id' => $company->id,
             'project_id' => $project->id,
+            'fileable_id' => $project->id,
             'uploaded_by' => $user->id,
-            'file_path' => $path,
+            'path' => $path,
         ]);
 
         $response = $this->withHeader('X-Company-Id', $company->id)
@@ -103,7 +108,7 @@ class DocumentsTest extends TestCase
 
         $response->assertStatus(204);
 
-        $this->assertDatabaseMissing('documents', [
+        $this->assertDatabaseMissing('files', [
             'id' => $document->id,
             'deleted_at' => null,
         ]);
@@ -124,11 +129,12 @@ class DocumentsTest extends TestCase
         $file = UploadedFile::fake()->create('document.pdf', 1000);
         $path = $file->store("documents/project-{$project->id}", 'local');
 
-        $document = Document::factory()->create([
+        $document = File::factory()->document()->create([
             'company_id' => $company->id,
             'project_id' => $project->id,
+            'fileable_id' => $project->id,
             'uploaded_by' => $uploader->id,
-            'file_path' => $path,
+            'path' => $path,
         ]);
 
         $response = $this->withHeader('X-Company-Id', $company->id)
@@ -175,10 +181,11 @@ class DocumentsTest extends TestCase
         $file = UploadedFile::fake()->create('document.pdf', 1000);
         $path = $file->store("documents/project-{$project->id}", 'local');
 
-        $document = Document::factory()->create([
+        $document = File::factory()->document()->create([
             'company_id' => $company2->id,
             'project_id' => $project->id,
-            'file_path' => $path,
+            'fileable_id' => $project->id,
+            'path' => $path,
         ]);
 
         $response = $this->withHeader('X-Company-Id', $company1->id)
@@ -202,11 +209,12 @@ class DocumentsTest extends TestCase
         $file = UploadedFile::fake()->create('document.pdf', 1000);
         $path = $file->store("documents/project-{$project->id}", 'local');
 
-        $document = Document::factory()->create([
+        $document = File::factory()->document()->create([
             'company_id' => $company->id,
             'project_id' => $project->id,
+            'fileable_id' => $project->id,
             'uploaded_by' => $user->id,
-            'file_path' => $path,
+            'path' => $path,
         ]);
 
         // Verify file exists before deletion

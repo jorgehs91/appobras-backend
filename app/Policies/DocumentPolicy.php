@@ -2,7 +2,7 @@
 
 namespace App\Policies;
 
-use App\Models\Document;
+use App\Models\File;
 use App\Models\Project;
 use App\Models\User;
 
@@ -20,10 +20,10 @@ class DocumentPolicy
     /**
      * Determine whether the user can view the document.
      */
-    public function view(User $user, Document $document): bool
+    public function view(User $user, File $file): bool
     {
         // User must be a member of the project
-        return $user->projects()->whereKey($document->project_id)->exists();
+        return $user->projects()->whereKey($file->project_id)->exists();
     }
 
     /**
@@ -38,10 +38,10 @@ class DocumentPolicy
     /**
      * Determine whether the user can delete the document.
      */
-    public function delete(User $user, Document $document): bool
+    public function delete(User $user, File $file): bool
     {
         // User must be a member of the project OR be the uploader
-        return $user->projects()->whereKey($document->project_id)->exists()
-            || $document->uploaded_by === $user->id;
+        return $user->projects()->whereKey($file->project_id)->exists()
+            || $file->uploaded_by === $user->id;
     }
 }

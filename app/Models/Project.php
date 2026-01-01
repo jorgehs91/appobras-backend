@@ -100,9 +100,22 @@ class Project extends Model
     /**
      * Get the documents for the project.
      */
+    /**
+     * Get all files for this project (polymorphic).
+     */
+    public function files()
+    {
+        return $this->morphMany(File::class, 'fileable');
+    }
+
+    /**
+     * Get documents for this project (alias for files with category='document').
+     * 
+     * @deprecated Use files()->where('category', 'document') instead
+     */
     public function documents()
     {
-        return $this->hasMany(Document::class);
+        return $this->files()->where('category', 'document');
     }
 
     /**
