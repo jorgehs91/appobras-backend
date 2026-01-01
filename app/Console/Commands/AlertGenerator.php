@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use App\Enums\TaskStatus;
 use App\Jobs\SendAlertJob;
+use App\Models\License;
 use App\Models\Task;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
@@ -62,18 +63,52 @@ class AlertGenerator extends Command
             })->values();
         }
 
-        // TODO: Query licenses expiring (when License model is available)
+        // Query licenses expiring
+        $expiringLicensesByProject = License::query()
+            ->expiringSoon($licenseAlertDays)
+            ->with(['project.users', 'file'])
+            ->get()
+            ->groupBy('project_id');
+
         $expiringLicenses = [];
+
+        foreach ($expiringLicensesByProject as $projectId => $licenses) {
+            $project = $licenses->first()->project;
+            
+            if (!$project) {
+                continue;
+            }
+
+            // Get all users from the project
+            $projectUsers = $project->users()->get();
+
+            foreach ($projectUsers as $user) {
+                if (!isset($expiringLicenses[$user->id])) {
+                    $expiringLicenses[$user->id] = [];
+                }
+
+                // Add licenses to user's list
+                foreach ($licenses as $license) {
+                    $expiringLicenses[$user->id][] = $license;
+                }
+            }
+        }
 
         $usersWithOverdue = count(array_filter($overdueTasks, fn($tasks) => $tasks->isNotEmpty()));
         $usersWithNearDue = count(array_filter($nearDueTasks, fn($tasks) => $tasks->isNotEmpty()));
+        $usersWithExpiringLicenses = count(array_filter($expiringLicenses, fn($licenses) => !empty($licenses)));
 
         $this->info("Found {$usersWithOverdue} users with overdue tasks");
         $this->info("Found {$usersWithNearDue} users with near-due tasks");
+        $this->info("Found {$usersWithExpiringLicenses} users with expiring licenses");
 
         // Dispatch queue jobs per user
         $usersProcessed = 0;
-        $allUserIds = array_unique(array_merge(array_keys($overdueTasks), array_keys($nearDueTasks)));
+        $allUserIds = array_unique(array_merge(
+            array_keys($overdueTasks),
+            array_keys($nearDueTasks),
+            array_keys($expiringLicenses)
+        ));
 
         foreach ($allUserIds as $userId) {
             $userOverdueTasks = $overdueTasks[$userId] ?? collect();

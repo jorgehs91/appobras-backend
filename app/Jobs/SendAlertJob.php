@@ -3,6 +3,7 @@
 namespace App\Jobs;
 
 use App\Mail\AlertMailable;
+use App\Models\License;
 use App\Models\Notification;
 use App\Models\Task;
 use App\Models\User;
@@ -23,7 +24,7 @@ class SendAlertJob implements ShouldQueue
      * @param  int  $userId
      * @param  Collection<int, Task>  $overdueTasks
      * @param  Collection<int, Task>  $nearDueTasks
-     * @param  array<int, mixed>  $expiringLicenses
+     * @param  array<int, License>  $expiringLicenses
      */
     public function __construct(
         public int $userId,
@@ -151,7 +152,34 @@ class SendAlertJob implements ShouldQueue
             }
         }
 
-        // TODO: Create notifications for expiring licenses when License model is available
+        // Create notifications for expiring licenses
+        foreach ($this->expiringLicenses as $license) {
+            if (!($license instanceof License)) {
+                continue;
+            }
+
+            $notification = Notification::create([
+                'user_id' => $this->userId,
+                'notifiable_id' => $license->id,
+                'notifiable_type' => License::class,
+                'type' => 'license.expiring',
+                'data' => [
+                    'license_id' => $license->id,
+                    'file_id' => $license->file_id,
+                    'file_name' => $license->file?->name,
+                    'expiry_date' => $license->expiry_date?->toDateString(),
+                    'days_until_expiration' => $license->daysUntilExpiration(),
+                    'project_id' => $license->project_id,
+                    'project_name' => $license->project?->name,
+                ],
+                'channels' => $channels,
+            ]);
+
+            if ($notificationCount === 0) {
+                $firstNotification = $notification;
+            }
+            $notificationCount++;
+        }
     }
 
     /**
@@ -160,16 +188,18 @@ class SendAlertJob implements ShouldQueue
     private function getNotificationTitle(string $type, int $count): string
     {
         if ($count === 1) {
-            return match ($type) {
-                'task.overdue' => 'Tarefa Atrasada',
-                'task.near_due' => 'Tarefa Próxima do Vencimento',
-                default => 'Nova Notificação',
-            };
+        return match ($type) {
+            'task.overdue' => 'Tarefa Atrasada',
+            'task.near_due' => 'Tarefa Próxima do Vencimento',
+            'license.expiring' => 'Licença Próxima do Vencimento',
+            default => 'Nova Notificação',
+        };
         }
 
         return match ($type) {
             'task.overdue' => "{$count} Tarefas Atrasadas",
             'task.near_due' => "{$count} Tarefas Próximas do Vencimento",
+            'license.expiring' => "{$count} Licenças Próximas do Vencimento",
             default => "{$count} Novas Notificações",
         };
     }
@@ -180,14 +210,31 @@ class SendAlertJob implements ShouldQueue
     private function getNotificationBody(Notification $notification, int $count): string
     {
         if ($count === 1) {
-            $taskTitle = $notification->data['task_title'] ?? 'Tarefa';
-            $projectName = $notification->data['project_name'] ?? '';
+            $type = $notification->type;
+            
+            if (in_array($type, ['task.overdue', 'task.near_due'])) {
+                $taskTitle = $notification->data['task_title'] ?? 'Tarefa';
+                $projectName = $notification->data['project_name'] ?? '';
 
-            if ($projectName) {
-                return "{$taskTitle} - {$projectName}";
+                if ($projectName) {
+                    return "{$taskTitle} - {$projectName}";
+                }
+
+                return $taskTitle;
             }
 
-            return $taskTitle;
+            if ($type === 'license.expiring') {
+                $fileName = $notification->data['file_name'] ?? 'Licença';
+                $daysUntilExpiration = $notification->data['days_until_expiration'] ?? 0;
+                $projectName = $notification->data['project_name'] ?? '';
+
+                $message = "{$fileName} vence em {$daysUntilExpiration} dia(s)";
+                if ($projectName) {
+                    $message .= " - {$projectName}";
+                }
+
+                return $message;
+            }
         }
 
         return "Você tem {$count} novas notificações";

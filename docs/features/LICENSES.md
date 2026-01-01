@@ -221,19 +221,18 @@ GET /api/v1/projects/1/licenses?status=active
 
 ### Endpoints Disponíveis
 
-> **Nota**: Os endpoints CRUD completos serão implementados na tarefa 34. Esta seção documenta a estrutura planejada.
+> **Nota**: ✅ Endpoints CRUD completos implementados na tarefa 34.
 
 #### 1. Listar Licenças
 
 ```http
-GET /api/v1/projects/{project}/licenses
+GET /api/v1/licenses
 ```
 
 **Query Parameters:**
+- `project_id` (opcional): Filtrar por projeto específico
 - `status` (opcional): Filtrar por status (active, expired, pending_renewal)
-- `expiring_soon` (opcional): Número de dias para considerar "vencendo em breve" (padrão: 30)
-- `page` (opcional): Número da página para paginação
-- `per_page` (opcional): Itens por página (padrão: 15)
+- `expiring_soon` (opcional, boolean): Filtrar licenças próximas do vencimento (usa threshold configurado)
 
 **Validações:**
 - Usuário deve ter acesso ao projeto
@@ -281,7 +280,7 @@ GET /api/v1/projects/{project}/licenses
 #### 2. Criar Licença
 
 ```http
-POST /api/v1/projects/{project}/licenses
+POST /api/v1/licenses
 ```
 
 **Body:**
@@ -426,7 +425,7 @@ DELETE /api/v1/licenses/{id}
 #### 6. Listar Licenças Vencendo
 
 ```http
-GET /api/v1/projects/{project}/licenses/expiring
+GET /api/v1/licenses/expiring
 ```
 
 **Query Parameters:**
@@ -500,10 +499,12 @@ GET /api/v1/projects/{project}/licenses/expiring
 
 ### Integração com AlertGenerator
 
-**Futuro (Tarefa 34):**
-- `AlertGenerator` será expandido para incluir query de licenças vencendo
-- Query: `License::expiringSoon(config('app.alert_license_days', 30))->get()`
-- Notificações serão disparadas para usuários com acesso ao projeto
+**✅ Implementado (Tarefa 34):**
+- `AlertGenerator` inclui query de licenças vencendo usando o scope `expiringSoon()`
+- Query: `License::expiringSoon($licenseAlertDays)->with(['project.users', 'file'])->get()`
+- Licenças são agrupadas por projeto e notificações são disparadas para todos os membros do projeto
+- Tipo de notificação: `license.expiring`
+- Notificações incluem: `license_id`, `file_name`, `expiry_date`, `days_until_expiration`, `project_id`, `project_name`
 
 ### Lifecycle
 
@@ -936,5 +937,5 @@ Embora validações sejam feitas no backend, é recomendado validar no frontend 
 
 **Última atualização:** 2026-01-01  
 **Versão da API:** v1  
-**Status:** ✅ Model Implementado (Endpoints na Tarefa 34)
+**Status:** ✅ Model e Endpoints Implementados e Testados
 

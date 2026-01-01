@@ -26,6 +26,7 @@ use App\Http\Controllers\ExpenseController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\PurchaseRequestController;
 use App\Http\Controllers\SupplierController;
+use App\Http\Controllers\LicenseController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('v1')->group(function (): void {
@@ -199,6 +200,14 @@ Route::prefix('v1')->group(function (): void {
             Route::post('/purchase-requests/{purchaseRequest}/submit', [PurchaseRequestController::class, 'submit']);
             Route::post('/purchase-requests/{purchaseRequest}/approve', [PurchaseRequestController::class, 'approve']);
             Route::post('/purchase-requests/{purchaseRequest}/reject', [PurchaseRequestController::class, 'reject']);
+
+            // Licenses (escopo project/company)
+            Route::get('/licenses', [LicenseController::class, 'index']);
+            Route::get('/licenses/expiring', [LicenseController::class, 'expiring']);
+            Route::post('/licenses', [LicenseController::class, 'store']);
+            Route::get('/licenses/{license}', [LicenseController::class, 'show']);
+            Route::put('/licenses/{license}', [LicenseController::class, 'update']);
+            Route::delete('/licenses/{license}', [LicenseController::class, 'destroy']);
         });
     });
 });
