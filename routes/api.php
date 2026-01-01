@@ -16,6 +16,7 @@ use App\Http\Controllers\ProjectProgressController;
 use App\Http\Controllers\TaskController;
 use App\Http\Controllers\TaskDependencyController;
 use App\Http\Controllers\AttachmentController;
+use App\Http\Controllers\Api\TaskCommentController;
 use App\Http\Controllers\BudgetController;
 use App\Http\Controllers\CostItemController;
 use App\Http\Controllers\ExpenseController;
@@ -114,6 +115,13 @@ Route::prefix('v1')->group(function (): void {
             Route::get('/attachments/{attachment}', [AttachmentController::class, 'show']);
             Route::get('/attachments/{attachment}/download', [AttachmentController::class, 'download']);
             Route::delete('/attachments/{attachment}', [AttachmentController::class, 'destroy']);
+
+            // Task Comments (escopo project via task)
+            Route::get('/tasks/{task}/comments', [TaskCommentController::class, 'index']);
+            Route::post('/tasks/{task}/comments', [TaskCommentController::class, 'store']);
+            Route::get('/tasks/{task}/comments/{comment}', [TaskCommentController::class, 'show']);
+            Route::put('/tasks/{task}/comments/{comment}', [TaskCommentController::class, 'update']);
+            Route::delete('/tasks/{task}/comments/{comment}', [TaskCommentController::class, 'destroy']);
 
             // Documents (escopo project)
             Route::get('/projects/{project}/documents', [DocumentController::class, 'index']);

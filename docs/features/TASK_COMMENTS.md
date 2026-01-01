@@ -117,26 +117,30 @@ Company
 
 ## 🌐 API Endpoints
 
-> **Nota**: Os endpoints de API ainda não foram implementados. Esta seção será atualizada quando os controllers forem criados.
+> **✅ Status**: Os endpoints de API foram implementados e estão disponíveis.
 
 ### Base URL
 
 ```
-/api/v1/tasks/{task_id}/comments
+/api/v1/tasks/{task}/comments
 ```
 
-### Endpoints Planejados
+### Endpoints Implementados
 
 #### 1. Listar Comentários de uma Tarefa
 
 ```http
-GET /api/v1/tasks/{task_id}/comments
+GET /api/v1/tasks/{task}/comments
 ```
+
+**Headers:**
+- `Authorization: Bearer {token}` (obrigatório)
+- `X-Company-Id: {company_id}` (obrigatório)
 
 **Query Parameters:**
 - `order_by` (opcional): Ordenar comentários por `created_at` (default: `asc`) ou `desc`
 
-**Resposta:**
+**Resposta (200 OK):**
 ```json
 {
   "data": [
@@ -148,7 +152,8 @@ GET /api/v1/tasks/{task_id}/comments
       "reactions": {"like": 3},
       "user": {
         "id": 5,
-        "name": "João Silva"
+        "name": "João Silva",
+        "email": "joao@example.com"
       },
       "created_at": "2026-01-01T10:00:00Z",
       "updated_at": "2026-01-01T10:00:00Z"
@@ -157,39 +162,170 @@ GET /api/v1/tasks/{task_id}/comments
 }
 ```
 
+**Códigos de Resposta:**
+- `200 OK`: Lista de comentários retornada com sucesso
+- `403 Forbidden`: Usuário não tem permissão para acessar a tarefa
+- `404 Not Found`: Tarefa não encontrada
+
 #### 2. Criar Comentário
 
 ```http
-POST /api/v1/tasks/{task_id}/comments
+POST /api/v1/tasks/{task}/comments
 ```
 
+**Headers:**
+- `Authorization: Bearer {token}` (obrigatório)
+- `X-Company-Id: {company_id}` (obrigatório)
+- `Content-Type: application/json` (obrigatório)
+
 **Body:**
-- `body` (obrigatório): Conteúdo do comentário
+```json
+{
+  "body": "Este é um comentário sobre a tarefa."
+}
+```
 
 **Validações:**
-- `body` não pode ser vazio
+- `body` (obrigatório): Conteúdo do comentário (string, máximo 10000 caracteres)
 
-#### 3. Atualizar Comentário
+**Resposta (201 Created):**
+```json
+{
+  "data": {
+    "id": 1,
+    "task_id": 10,
+    "user_id": 5,
+    "body": "Este é um comentário sobre a tarefa.",
+    "reactions": null,
+    "user": {
+      "id": 5,
+      "name": "João Silva",
+      "email": "joao@example.com"
+    },
+    "created_at": "2026-01-01T10:00:00Z",
+    "updated_at": "2026-01-01T10:00:00Z"
+  }
+}
+```
+
+**Códigos de Resposta:**
+- `201 Created`: Comentário criado com sucesso
+- `403 Forbidden`: Usuário não tem permissão para comentar na tarefa
+- `422 Unprocessable Entity`: Erro de validação (body vazio ou muito longo)
+- `404 Not Found`: Tarefa não encontrada
+
+#### 3. Obter Comentário Específico
 
 ```http
-PUT /api/v1/tasks/{task_id}/comments/{comment_id}
+GET /api/v1/tasks/{task}/comments/{comment}
 ```
 
+**Headers:**
+- `Authorization: Bearer {token}` (obrigatório)
+- `X-Company-Id: {company_id}` (obrigatório)
+
+**Resposta (200 OK):**
+```json
+{
+  "data": {
+    "id": 1,
+    "task_id": 10,
+    "user_id": 5,
+    "body": "Este é um comentário de exemplo",
+    "reactions": {"like": 3},
+    "user": {
+      "id": 5,
+      "name": "João Silva",
+      "email": "joao@example.com"
+    },
+    "created_at": "2026-01-01T10:00:00Z",
+    "updated_at": "2026-01-01T10:00:00Z"
+  }
+}
+```
+
+**Códigos de Resposta:**
+- `200 OK`: Comentário encontrado
+- `403 Forbidden`: Usuário não tem permissão para acessar a tarefa
+- `404 Not Found`: Comentário não encontrado ou não pertence à tarefa
+
+#### 4. Atualizar Comentário
+
+```http
+PUT /api/v1/tasks/{task}/comments/{comment}
+```
+
+**Headers:**
+- `Authorization: Bearer {token}` (obrigatório)
+- `X-Company-Id: {company_id}` (obrigatório)
+- `Content-Type: application/json` (obrigatório)
+
 **Body:**
-- `body` (opcional): Novo conteúdo do comentário
-- `reactions` (opcional): Novo objeto de reactions
+```json
+{
+  "body": "Comentário atualizado",
+  "reactions": {
+    "like": 5,
+    "love": 2
+  }
+}
+```
 
 **Validações:**
+- `body` (opcional): Novo conteúdo do comentário (string, máximo 10000 caracteres)
+- `reactions` (opcional): Objeto JSON com reactions (ex: `{"like": 5, "love": 2}`)
 - Apenas o autor pode atualizar o comentário
 
-#### 4. Deletar Comentário
+**Resposta (200 OK):**
+```json
+{
+  "data": {
+    "id": 1,
+    "task_id": 10,
+    "user_id": 5,
+    "body": "Comentário atualizado",
+    "reactions": {
+      "like": 5,
+      "love": 2
+    },
+    "user": {
+      "id": 5,
+      "name": "João Silva",
+      "email": "joao@example.com"
+    },
+    "created_at": "2026-01-01T10:00:00Z",
+    "updated_at": "2026-01-01T11:00:00Z"
+  }
+}
+```
+
+**Códigos de Resposta:**
+- `200 OK`: Comentário atualizado com sucesso
+- `403 Forbidden`: Usuário não tem permissão para atualizar (não é o autor)
+- `404 Not Found`: Comentário não encontrado ou não pertence à tarefa
+- `422 Unprocessable Entity`: Erro de validação
+
+#### 5. Deletar Comentário
 
 ```http
-DELETE /api/v1/tasks/{task_id}/comments/{comment_id}
+DELETE /api/v1/tasks/{task}/comments/{comment}
 ```
+
+**Headers:**
+- `Authorization: Bearer {token}` (obrigatório)
+- `X-Company-Id: {company_id}` (obrigatório)
 
 **Comportamento:**
 - Soft delete (comentário não é removido fisicamente)
+- Apenas o autor pode deletar o comentário
+
+**Resposta (204 No Content):**
+- Corpo vazio
+
+**Códigos de Resposta:**
+- `204 No Content`: Comentário removido com sucesso
+- `403 Forbidden`: Usuário não tem permissão para deletar (não é o autor)
+- `404 Not Found`: Comentário não encontrado ou não pertence à tarefa
 
 ---
 
@@ -538,6 +674,6 @@ Embora validações sejam feitas no backend, é recomendado validar no frontend 
 ---
 
 **Última atualização:** 2026-01-01  
-**Versão da API:** v1 (endpoints ainda não implementados)  
-**Status:** ✅ Model, Migration, Factory e Testes Implementados
+**Versão da API:** v1  
+**Status:** ✅ Model, Migration, Factory, Controller, Routes, Tests e Documentação Implementados
 
