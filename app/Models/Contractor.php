@@ -40,6 +40,14 @@ class Contractor extends Model
     }
 
     /**
+     * Get the contracts for this contractor.
+     */
+    public function contracts()
+    {
+        return $this->hasMany(Contract::class);
+    }
+
+    /**
      * Get the user who created the contractor.
      */
     public function creator()

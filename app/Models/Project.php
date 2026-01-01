@@ -127,6 +127,14 @@ class Project extends Model
     }
 
     /**
+     * Get the contracts for the project.
+     */
+    public function contracts()
+    {
+        return $this->hasMany(Contract::class);
+    }
+
+    /**
      * Calculate progress percentage based on active phases.
      * Returns average of phase progress (only active phases).
      */
