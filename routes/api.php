@@ -4,8 +4,11 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\Admin\AuditLogController;
 use App\Http\Controllers\Admin\RoleController;
 use App\Http\Controllers\CompanyController;
+use App\Http\Controllers\ContractController;
 use App\Http\Controllers\ContractorController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\WorkOrderController;
 use App\Http\Controllers\DocumentController;
 use App\Http\Controllers\InviteController;
 use App\Http\Controllers\MeController;
@@ -79,6 +82,29 @@ Route::prefix('v1')->group(function (): void {
             Route::post('/contractors', [ContractorController::class, 'store']);
             Route::put('/contractors/{contractor}', [ContractorController::class, 'update']);
             Route::delete('/contractors/{contractor}', [ContractorController::class, 'destroy']);
+
+            // Contracts (escopo contractor)
+            Route::get('/contractors/{contractor}/contracts', [ContractController::class, 'index']);
+            Route::post('/contractors/{contractor}/contracts', [ContractController::class, 'store']);
+            Route::get('/contractors/{contractor}/contracts/{contract}', [ContractController::class, 'show']);
+            Route::put('/contractors/{contractor}/contracts/{contract}', [ContractController::class, 'update']);
+            Route::delete('/contractors/{contractor}/contracts/{contract}', [ContractController::class, 'destroy']);
+
+            // Work Orders (escopo contractor)
+            Route::get('/contractors/{contractor}/work-orders', [WorkOrderController::class, 'index']);
+            Route::post('/contractors/{contractor}/work-orders', [WorkOrderController::class, 'store']);
+            Route::get('/contractors/{contractor}/work-orders/{workOrder}', [WorkOrderController::class, 'show']);
+            Route::put('/contractors/{contractor}/work-orders/{workOrder}', [WorkOrderController::class, 'update']);
+            Route::delete('/contractors/{contractor}/work-orders/{workOrder}', [WorkOrderController::class, 'destroy']);
+            Route::post('/contractors/{contractor}/work-orders/{workOrder}/approve', [WorkOrderController::class, 'approve']);
+
+            // Payments (escopo contractor)
+            Route::get('/contractors/{contractor}/payments', [PaymentController::class, 'index']);
+            Route::get('/contractors/{contractor}/payments/pending', [PaymentController::class, 'pending']);
+            Route::post('/contractors/{contractor}/payments', [PaymentController::class, 'store']);
+            Route::get('/contractors/{contractor}/payments/{payment}', [PaymentController::class, 'show']);
+            Route::put('/contractors/{contractor}/payments/{payment}', [PaymentController::class, 'update']);
+            Route::delete('/contractors/{contractor}/payments/{payment}', [PaymentController::class, 'destroy']);
 
             // Suppliers (escopo company)
             Route::get('/suppliers', [SupplierController::class, 'index']);

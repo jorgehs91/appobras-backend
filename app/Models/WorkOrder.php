@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\WorkOrderStatus;
 use App\Traits\AuditTrait;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -21,6 +22,7 @@ class WorkOrder extends Model
         'description',
         'value',
         'due_date',
+        'status',
         'created_by',
         'updated_by',
     ];
@@ -33,6 +35,7 @@ class WorkOrder extends Model
         return [
             'value' => 'decimal:2',
             'due_date' => 'date',
+            'status' => WorkOrderStatus::class,
         ];
     }
 

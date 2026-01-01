@@ -22,6 +22,7 @@ class AuthServiceProvider extends ServiceProvider
         \App\Models\File::class => \App\Policies\DocumentPolicy::class,
         \App\Models\Project::class => \App\Policies\ProjectMemberPolicy::class,
         \App\Models\PurchaseRequest::class => \App\Policies\PurchaseRequestPolicy::class,
+        \App\Models\WorkOrder::class => \App\Policies\WorkOrderPolicy::class,
     ];
 
     public function boot(): void
