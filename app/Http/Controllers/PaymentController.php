@@ -14,6 +14,10 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 /**
+ * @group Empreiteiros
+ *
+ * Endpoints relacionados ao gerenciamento de pagamentos de empreiteiros.
+ *
  * @OA\Tag(
  *     name="Payments",
  *     description="Gerenciamento de pagamentos de empreiteiros"

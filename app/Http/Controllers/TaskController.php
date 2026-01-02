@@ -14,6 +14,10 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 /**
+ * @group Tarefas
+ *
+ * Endpoints relacionados ao gerenciamento de tarefas de projetos.
+ *
  * @OA\Tag(
  *     name="Tasks",
  *     description="Gerenciamento de tarefas do projeto"

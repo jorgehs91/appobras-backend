@@ -19,6 +19,10 @@ use Illuminate\Support\Facades\Storage;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 /**
+ * @group Dashboard e Relatórios
+ *
+ * Endpoints relacionados à exportação de relatórios em formato CSV.
+ *
  * @OA\Tag(
  *     name="Reports",
  *     description="Exportação de relatórios em formato CSV"

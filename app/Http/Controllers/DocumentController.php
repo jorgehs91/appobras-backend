@@ -11,6 +11,10 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
 /**
+ * @group Documentos
+ *
+ * Endpoints relacionados ao gerenciamento de documentos de projetos.
+ *
  * @OA\Tag(
  *     name="Documents",
  *     description="Gerenciamento de documentos do projeto"

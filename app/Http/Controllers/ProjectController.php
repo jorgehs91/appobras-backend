@@ -11,6 +11,10 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 /**
+ * @group Projetos
+ *
+ * Endpoints relacionados ao gerenciamento de projetos/obras.
+ *
  * @OA\Tag(
  *     name="Projects",
  *     description="Gerenciamento de projetos/obras"

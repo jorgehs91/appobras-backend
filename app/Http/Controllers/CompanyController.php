@@ -11,6 +11,10 @@ use Spatie\Permission\PermissionRegistrar;
 use Spatie\Permission\Models\Role;
 
 /**
+ * @group Empresas
+ *
+ * Endpoints relacionados ao gerenciamento de empresas.
+ *
  * @OA\Tag(
  *     name="Companies",
  *     description="Gerenciamento de empresas"

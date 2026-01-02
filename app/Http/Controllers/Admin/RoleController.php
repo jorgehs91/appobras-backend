@@ -11,6 +11,10 @@ use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 
 /**
+ * @group Admin
+ *
+ * Endpoints administrativos para gerenciamento de roles e permissões.
+ *
  * @OA\Tag(
  *     name="Admin",
  *     description="Gerenciamento administrativo de roles e permissões"

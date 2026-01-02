@@ -8,6 +8,10 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 /**
+ * @group Admin
+ *
+ * Endpoints administrativos para visualização de logs de auditoria.
+ *
  * @OA\Tag(
  *     name="Admin",
  *     description="Gerenciamento administrativo de auditoria"

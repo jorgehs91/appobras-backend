@@ -13,6 +13,10 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 /**
+ * @group Orçamentos
+ *
+ * Endpoints relacionados ao gerenciamento de orçamentos de projetos.
+ *
  * @OA\Tag(
  *     name="Budgets",
  *     description="Gerenciamento de orçamentos do projeto"

@@ -15,6 +15,10 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
 /**
+ * @group Projetos
+ *
+ * Endpoints relacionados ao gerenciamento de membros de projetos.
+ *
  * @OA\Tag(
  *     name="Project Members",
  *     description="Gerenciamento de membros de projeto"

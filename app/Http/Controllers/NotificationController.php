@@ -8,6 +8,10 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 /**
+ * @group Notificações
+ *
+ * Endpoints relacionados ao gerenciamento de notificações do usuário.
+ *
  * @OA\Tag(
  *     name="Notifications",
  *     description="Gerenciamento de notificações do usuário"

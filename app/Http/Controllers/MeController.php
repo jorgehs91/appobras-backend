@@ -8,6 +8,10 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 /**
+ * @group Usuário
+ *
+ * Endpoints relacionados ao usuário autenticado (preferências, troca de contexto).
+ *
  * @OA\Tag(
  *     name="Me",
  *     description="Operações do usuário autenticado"

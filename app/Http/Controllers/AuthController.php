@@ -13,6 +13,11 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Validation\ValidationException;
 
+/**
+ * @group Autenticação
+ *
+ * Endpoints relacionados à autenticação de usuários (login, registro, recuperação de senha).
+ */
 class AuthController extends Controller
 {
     /**

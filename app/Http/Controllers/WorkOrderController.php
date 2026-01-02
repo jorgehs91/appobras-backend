@@ -13,6 +13,10 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 /**
+ * @group Empreiteiros
+ *
+ * Endpoints relacionados ao gerenciamento de ordens de serviço de empreiteiros.
+ *
  * @OA\Tag(
  *     name="WorkOrders",
  *     description="Gerenciamento de ordens de serviço de empreiteiros"

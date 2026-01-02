@@ -7,6 +7,10 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 /**
+ * @group Dashboard e Relatórios
+ *
+ * Endpoints relacionados a progresso e estatísticas de projetos.
+ *
  * @OA\Tag(
  *     name="Progress",
  *     description="Progresso e estatísticas"

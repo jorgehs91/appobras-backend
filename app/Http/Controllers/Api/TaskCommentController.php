@@ -12,6 +12,10 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 /**
+ * @group Tarefas
+ *
+ * Endpoints relacionados ao gerenciamento de comentários em tarefas.
+ *
  * @OA\Tag(
  *     name="Task Comments",
  *     description="Gerenciamento de comentários em tarefas"

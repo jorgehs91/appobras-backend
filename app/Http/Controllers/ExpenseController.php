@@ -16,6 +16,10 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 
 /**
+ * @group Despesas
+ *
+ * Endpoints relacionados ao gerenciamento de despesas de projetos.
+ *
  * @OA\Tag(
  *     name="Expenses",
  *     description="Gerenciamento de despesas realizadas do projeto"

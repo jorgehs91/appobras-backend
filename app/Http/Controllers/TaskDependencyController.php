@@ -15,6 +15,10 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\ValidationException;
 
 /**
+ * @group Tarefas
+ *
+ * Endpoints relacionados ao gerenciamento de dependências entre tarefas.
+ *
  * @OA\Tag(
  *     name="Task Dependencies",
  *     description="Gerenciamento de dependências entre tarefas"

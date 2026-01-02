@@ -11,6 +11,10 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
 /**
+ * @group Tarefas
+ *
+ * Endpoints relacionados ao gerenciamento de anexos de tarefas.
+ *
  * @OA\Tag(
  *     name="Attachments",
  *     description="Gerenciamento de anexos de tarefas"

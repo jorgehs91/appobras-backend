@@ -15,6 +15,11 @@ use Illuminate\Http\Request;
  *     description="Gerenciamento de fornecedores"
  * )
  */
+/**
+ * @group Fornecedores
+ *
+ * Endpoints relacionados ao gerenciamento de fornecedores.
+ */
 class SupplierController extends Controller
 {
     /**

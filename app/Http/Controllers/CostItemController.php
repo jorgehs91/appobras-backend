@@ -12,6 +12,10 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 /**
+ * @group Orçamentos
+ *
+ * Endpoints relacionados ao gerenciamento de itens de custo do orçamento.
+ *
  * @OA\Tag(
  *     name="Cost Items",
  *     description="Gerenciamento de itens de custo do orçamento"

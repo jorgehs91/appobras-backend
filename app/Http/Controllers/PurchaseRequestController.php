@@ -14,6 +14,10 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 /**
+ * @group Solicitações de Compra
+ *
+ * Endpoints relacionados ao gerenciamento de requisições de compra.
+ *
  * @OA\Tag(
  *     name="PurchaseRequests",
  *     description="Gerenciamento de requisições de compra"

@@ -12,6 +12,10 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 /**
+ * @group Empreiteiros
+ *
+ * Endpoints relacionados ao gerenciamento de contratos de empreiteiros.
+ *
  * @OA\Tag(
  *     name="Contracts",
  *     description="Gerenciamento de contratos de empreiteiros"

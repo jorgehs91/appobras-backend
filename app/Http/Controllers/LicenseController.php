@@ -10,6 +10,10 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 /**
+ * @group Licenças
+ *
+ * Endpoints relacionados ao gerenciamento de licenças de projetos.
+ *
  * @OA\Tag(
  *     name="Licenses",
  *     description="Gerenciamento de licenças de projetos"

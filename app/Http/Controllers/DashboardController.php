@@ -12,6 +12,11 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 
+/**
+ * @group Dashboard e Relatórios
+ *
+ * Endpoints relacionados a estatísticas e dashboard.
+ */
 class DashboardController extends Controller
 {
     /**

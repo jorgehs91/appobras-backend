@@ -1,0 +1,576 @@
+name: Despesas
+description: |-
+
+  Endpoints relacionados ao gerenciamento de despesas de projetos.
+endpoints:
+  -
+    custom: []
+    httpMethods:
+      - GET
+    uri: 'api/v1/projects/{project_id}/expenses'
+    metadata:
+      custom: []
+      groupName: Despesas
+      groupDescription: |-
+
+        Endpoints relacionados ao gerenciamento de despesas de projetos.
+      subgroup: ''
+      subgroupDescription: ''
+      title: ''
+      description: ''
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer {YOUR_AUTH_TOKEN}'
+      Content-Type: application/json
+      Accept: application/json
+      X-Company-Id: '1'
+    urlParameters:
+      project_id:
+        custom: []
+        name: project_id
+        description: 'The ID of the project.'
+        required: true
+        example: 17
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanUrlParameters:
+      project_id: 17
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses:
+      -
+        custom: []
+        status: 401
+        content: '{"message":"Unauthenticated."}'
+        headers:
+          cache-control: 'no-cache, private'
+          content-type: application/json
+          access-control-allow-origin: '*'
+        description: null
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 'Bearer 3V5EgbkvZcDPa166h8fd4ae'
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - POST
+    uri: 'api/v1/projects/{project_id}/expenses'
+    metadata:
+      custom: []
+      groupName: Despesas
+      groupDescription: |-
+
+        Endpoints relacionados ao gerenciamento de despesas de projetos.
+      subgroup: ''
+      subgroupDescription: ''
+      title: ''
+      description: ''
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer {YOUR_AUTH_TOKEN}'
+      Content-Type: multipart/form-data
+      Accept: application/json
+      X-Company-Id: '1'
+    urlParameters:
+      project_id:
+        custom: []
+        name: project_id
+        description: 'The ID of the project.'
+        required: true
+        example: 17
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanUrlParameters:
+      project_id: 17
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters:
+      cost_item_id:
+        custom: []
+        name: cost_item_id
+        description: 'The <code>id</code> of an existing record in the cost_items table.'
+        required: false
+        example: 17
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: true
+        deprecated: false
+      amount:
+        custom: []
+        name: amount
+        description: 'Must be at least 0.01. Must not be greater than 9999999999999.99.'
+        required: true
+        example: 13
+        type: number
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      date:
+        custom: []
+        name: date
+        description: 'Must be a valid date.'
+        required: true
+        example: '2026-01-02T13:30:23'
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      description:
+        custom: []
+        name: description
+        description: 'Must not be greater than 1000 characters.'
+        required: false
+        example: 'Amet iste laborum eius est dolor dolores.'
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: true
+        deprecated: false
+      receipt:
+        custom: []
+        name: receipt
+        description: 'Must be a file. Must not be greater than 10240 kilobytes.'
+        required: false
+        example: null
+        type: file
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: true
+        deprecated: false
+      receipt_path:
+        custom: []
+        name: receipt_path
+        description: 'Must not be greater than 500 characters.'
+        required: false
+        example: tdsufvyvddqamniihfqco
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: true
+        deprecated: false
+      status:
+        custom: []
+        name: status
+        description: ''
+        required: true
+        example: consequatur
+        type: string
+        enumValues:
+          - draft
+          - approved
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanBodyParameters:
+      cost_item_id: 17
+      amount: 13
+      date: '2026-01-02T13:30:23'
+      description: 'Amet iste laborum eius est dolor dolores.'
+      receipt_path: tdsufvyvddqamniihfqco
+      status: consequatur
+    fileParameters:
+      receipt: null
+    responses: []
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 'Bearer 3V5EgbkvZcDPa166h8fd4ae'
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - GET
+    uri: 'api/v1/projects/{project_id}/pvxr'
+    metadata:
+      custom: []
+      groupName: Despesas
+      groupDescription: |-
+
+        Endpoints relacionados ao gerenciamento de despesas de projetos.
+      subgroup: ''
+      subgroupDescription: ''
+      title: ''
+      description: ''
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer {YOUR_AUTH_TOKEN}'
+      Content-Type: application/json
+      Accept: application/json
+      X-Company-Id: '1'
+    urlParameters:
+      project_id:
+        custom: []
+        name: project_id
+        description: 'The ID of the project.'
+        required: true
+        example: 17
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanUrlParameters:
+      project_id: 17
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses:
+      -
+        custom: []
+        status: 401
+        content: '{"message":"Unauthenticated."}'
+        headers:
+          cache-control: 'no-cache, private'
+          content-type: application/json
+          access-control-allow-origin: '*'
+        description: null
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 'Bearer 3V5EgbkvZcDPa166h8fd4ae'
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - GET
+    uri: 'api/v1/expenses/{expense_id}'
+    metadata:
+      custom: []
+      groupName: Despesas
+      groupDescription: |-
+
+        Endpoints relacionados ao gerenciamento de despesas de projetos.
+      subgroup: ''
+      subgroupDescription: ''
+      title: ''
+      description: ''
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer {YOUR_AUTH_TOKEN}'
+      Content-Type: application/json
+      Accept: application/json
+      X-Company-Id: '1'
+    urlParameters:
+      expense_id:
+        custom: []
+        name: expense_id
+        description: 'The ID of the expense.'
+        required: true
+        example: 17
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanUrlParameters:
+      expense_id: 17
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses:
+      -
+        custom: []
+        status: 401
+        content: '{"message":"Unauthenticated."}'
+        headers:
+          cache-control: 'no-cache, private'
+          content-type: application/json
+          access-control-allow-origin: '*'
+        description: null
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 'Bearer 3V5EgbkvZcDPa166h8fd4ae'
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - PUT
+      - PATCH
+    uri: 'api/v1/expenses/{expense_id}'
+    metadata:
+      custom: []
+      groupName: Despesas
+      groupDescription: |-
+
+        Endpoints relacionados ao gerenciamento de despesas de projetos.
+      subgroup: ''
+      subgroupDescription: ''
+      title: ''
+      description: ''
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer {YOUR_AUTH_TOKEN}'
+      Content-Type: multipart/form-data
+      Accept: application/json
+      X-Company-Id: '1'
+    urlParameters:
+      expense_id:
+        custom: []
+        name: expense_id
+        description: 'The ID of the expense.'
+        required: true
+        example: 17
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanUrlParameters:
+      expense_id: 17
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters:
+      cost_item_id:
+        custom: []
+        name: cost_item_id
+        description: 'The <code>id</code> of an existing record in the cost_items table.'
+        required: false
+        example: 17
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: true
+        deprecated: false
+      project_id:
+        custom: []
+        name: project_id
+        description: 'The <code>id</code> of an existing record in the projects table.'
+        required: false
+        example: 17
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      amount:
+        custom: []
+        name: amount
+        description: 'Must be at least 0.01. Must not be greater than 9999999999999.99.'
+        required: false
+        example: 13
+        type: number
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      date:
+        custom: []
+        name: date
+        description: 'Must be a valid date.'
+        required: false
+        example: '2026-01-02T13:30:23'
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      description:
+        custom: []
+        name: description
+        description: 'Must not be greater than 1000 characters.'
+        required: false
+        example: 'Amet iste laborum eius est dolor dolores.'
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: true
+        deprecated: false
+      receipt:
+        custom: []
+        name: receipt
+        description: 'Must be a file. Must not be greater than 10240 kilobytes.'
+        required: false
+        example: null
+        type: file
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: true
+        deprecated: false
+      receipt_path:
+        custom: []
+        name: receipt_path
+        description: 'Must not be greater than 500 characters.'
+        required: false
+        example: tdsufvyvddqamniihfqco
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: true
+        deprecated: false
+      status:
+        custom: []
+        name: status
+        description: ''
+        required: false
+        example: consequatur
+        type: string
+        enumValues:
+          - draft
+          - approved
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanBodyParameters:
+      cost_item_id: 17
+      project_id: 17
+      amount: 13
+      date: '2026-01-02T13:30:23'
+      description: 'Amet iste laborum eius est dolor dolores.'
+      receipt_path: tdsufvyvddqamniihfqco
+      status: consequatur
+    fileParameters:
+      receipt: null
+    responses: []
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 'Bearer 3V5EgbkvZcDPa166h8fd4ae'
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - DELETE
+    uri: 'api/v1/expenses/{expense_id}'
+    metadata:
+      custom: []
+      groupName: Despesas
+      groupDescription: |-
+
+        Endpoints relacionados ao gerenciamento de despesas de projetos.
+      subgroup: ''
+      subgroupDescription: ''
+      title: ''
+      description: ''
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer {YOUR_AUTH_TOKEN}'
+      Content-Type: application/json
+      Accept: application/json
+      X-Company-Id: '1'
+    urlParameters:
+      expense_id:
+        custom: []
+        name: expense_id
+        description: 'The ID of the expense.'
+        required: true
+        example: 17
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanUrlParameters:
+      expense_id: 17
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses: []
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 'Bearer 3V5EgbkvZcDPa166h8fd4ae'
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - GET
+    uri: 'api/v1/expenses/{expense_id}/receipt'
+    metadata:
+      custom: []
+      groupName: Despesas
+      groupDescription: |-
+
+        Endpoints relacionados ao gerenciamento de despesas de projetos.
+      subgroup: ''
+      subgroupDescription: ''
+      title: ''
+      description: ''
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer {YOUR_AUTH_TOKEN}'
+      Content-Type: application/json
+      Accept: application/json
+      X-Company-Id: '1'
+    urlParameters:
+      expense_id:
+        custom: []
+        name: expense_id
+        description: 'The ID of the expense.'
+        required: true
+        example: 17
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanUrlParameters:
+      expense_id: 17
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses:
+      -
+        custom: []
+        status: 401
+        content: '{"message":"Unauthenticated."}'
+        headers:
+          cache-control: 'no-cache, private'
+          content-type: application/json
+          access-control-allow-origin: '*'
+        description: null
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 'Bearer 3V5EgbkvZcDPa166h8fd4ae'
+    controller: null
+    method: null
+    route: null

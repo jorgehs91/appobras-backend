@@ -12,6 +12,10 @@ use Spatie\Permission\PermissionRegistrar;
 use Spatie\Permission\Models\Role;
 
 /**
+ * @group Convites
+ *
+ * Endpoints relacionados ao gerenciamento de convites para empresas e projetos.
+ *
  * @OA\Tag(
  *     name="Invites",
  *     description="Gerenciamento de convites para empresas"

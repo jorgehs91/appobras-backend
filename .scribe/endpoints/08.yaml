@@ -1,0 +1,321 @@
+name: Fornecedores
+description: |-
+
+  Endpoints relacionados ao gerenciamento de fornecedores.
+endpoints:
+  -
+    custom: []
+    httpMethods:
+      - GET
+    uri: api/v1/suppliers
+    metadata:
+      custom: []
+      groupName: Fornecedores
+      groupDescription: |-
+
+        Endpoints relacionados ao gerenciamento de fornecedores.
+      subgroup: ''
+      subgroupDescription: ''
+      title: ''
+      description: ''
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer {YOUR_AUTH_TOKEN}'
+      Content-Type: application/json
+      Accept: application/json
+      X-Company-Id: '1'
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses:
+      -
+        custom: []
+        status: 401
+        content: '{"message":"Unauthenticated."}'
+        headers:
+          cache-control: 'no-cache, private'
+          content-type: application/json
+          access-control-allow-origin: '*'
+        description: null
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 'Bearer 3V5EgbkvZcDPa166h8fd4ae'
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - GET
+    uri: 'api/v1/suppliers/{supplier_id}'
+    metadata:
+      custom: []
+      groupName: Fornecedores
+      groupDescription: |-
+
+        Endpoints relacionados ao gerenciamento de fornecedores.
+      subgroup: ''
+      subgroupDescription: ''
+      title: ''
+      description: ''
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer {YOUR_AUTH_TOKEN}'
+      Content-Type: application/json
+      Accept: application/json
+      X-Company-Id: '1'
+    urlParameters:
+      supplier_id:
+        custom: []
+        name: supplier_id
+        description: 'The ID of the supplier.'
+        required: true
+        example: 17
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanUrlParameters:
+      supplier_id: 17
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses:
+      -
+        custom: []
+        status: 401
+        content: '{"message":"Unauthenticated."}'
+        headers:
+          cache-control: 'no-cache, private'
+          content-type: application/json
+          access-control-allow-origin: '*'
+        description: null
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 'Bearer 3V5EgbkvZcDPa166h8fd4ae'
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - POST
+    uri: api/v1/suppliers
+    metadata:
+      custom: []
+      groupName: Fornecedores
+      groupDescription: |-
+
+        Endpoints relacionados ao gerenciamento de fornecedores.
+      subgroup: ''
+      subgroupDescription: ''
+      title: ''
+      description: ''
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer {YOUR_AUTH_TOKEN}'
+      Content-Type: application/json
+      Accept: application/json
+      X-Company-Id: '1'
+    urlParameters: []
+    cleanUrlParameters: []
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters:
+      name:
+        custom: []
+        name: name
+        description: 'Must not be greater than 255 characters.'
+        required: true
+        example: vmqeopfuudtdsufvyvddq
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      cnpj:
+        custom: []
+        name: cnpj
+        description: 'Must match the regex /^\d{2}\.\d{3}\.\d{3}\/\d{4}-\d{2}$|^\d{14}$/.'
+        required: true
+        example: 71.717.728/9811-60$|^45332260595409
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      contact:
+        custom: []
+        name: contact
+        description: 'Must not be greater than 255 characters.'
+        required: false
+        example: ghdtqtqxbajwbpilpmufi
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: true
+        deprecated: false
+    cleanBodyParameters:
+      name: vmqeopfuudtdsufvyvddq
+      cnpj: 71.717.728/9811-60$|^45332260595409
+      contact: ghdtqtqxbajwbpilpmufi
+    fileParameters: []
+    responses: []
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 'Bearer 3V5EgbkvZcDPa166h8fd4ae'
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - PUT
+    uri: 'api/v1/suppliers/{supplier_id}'
+    metadata:
+      custom: []
+      groupName: Fornecedores
+      groupDescription: |-
+
+        Endpoints relacionados ao gerenciamento de fornecedores.
+      subgroup: ''
+      subgroupDescription: ''
+      title: ''
+      description: ''
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer {YOUR_AUTH_TOKEN}'
+      Content-Type: application/json
+      Accept: application/json
+      X-Company-Id: '1'
+    urlParameters:
+      supplier_id:
+        custom: []
+        name: supplier_id
+        description: 'The ID of the supplier.'
+        required: true
+        example: 17
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanUrlParameters:
+      supplier_id: 17
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters:
+      name:
+        custom: []
+        name: name
+        description: 'Must not be greater than 255 characters.'
+        required: false
+        example: vmqeopfuudtdsufvyvddq
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      cnpj:
+        custom: []
+        name: cnpj
+        description: 'Must match the regex /^\d{2}\.\d{3}\.\d{3}\/\d{4}-\d{2}$|^\d{14}$/.'
+        required: false
+        example: 71.717.728/9811-60$|^45332260595409
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      contact:
+        custom: []
+        name: contact
+        description: 'Must not be greater than 255 characters.'
+        required: false
+        example: ghdtqtqxbajwbpilpmufi
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: true
+        deprecated: false
+    cleanBodyParameters:
+      name: vmqeopfuudtdsufvyvddq
+      cnpj: 71.717.728/9811-60$|^45332260595409
+      contact: ghdtqtqxbajwbpilpmufi
+    fileParameters: []
+    responses: []
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 'Bearer 3V5EgbkvZcDPa166h8fd4ae'
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - DELETE
+    uri: 'api/v1/suppliers/{supplier_id}'
+    metadata:
+      custom: []
+      groupName: Fornecedores
+      groupDescription: |-
+
+        Endpoints relacionados ao gerenciamento de fornecedores.
+      subgroup: ''
+      subgroupDescription: ''
+      title: ''
+      description: ''
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer {YOUR_AUTH_TOKEN}'
+      Content-Type: application/json
+      Accept: application/json
+      X-Company-Id: '1'
+    urlParameters:
+      supplier_id:
+        custom: []
+        name: supplier_id
+        description: 'The ID of the supplier.'
+        required: true
+        example: 17
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanUrlParameters:
+      supplier_id: 17
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses: []
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 'Bearer 3V5EgbkvZcDPa166h8fd4ae'
+    controller: null
+    method: null
+    route: null

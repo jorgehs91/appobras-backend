@@ -11,6 +11,10 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 /**
+ * @group Fases
+ *
+ * Endpoints relacionados ao gerenciamento de fases de projetos.
+ *
  * @OA\Tag(
  *     name="Phases",
  *     description="Gerenciamento de fases do projeto"

@@ -1,0 +1,412 @@
+name: Fases
+description: |-
+
+  Endpoints relacionados ao gerenciamento de fases de projetos.
+endpoints:
+  -
+    custom: []
+    httpMethods:
+      - GET
+    uri: 'api/v1/projects/{project_id}/phases'
+    metadata:
+      custom: []
+      groupName: Fases
+      groupDescription: |-
+
+        Endpoints relacionados ao gerenciamento de fases de projetos.
+      subgroup: ''
+      subgroupDescription: ''
+      title: ''
+      description: ''
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer {YOUR_AUTH_TOKEN}'
+      Content-Type: application/json
+      Accept: application/json
+      X-Company-Id: '1'
+    urlParameters:
+      project_id:
+        custom: []
+        name: project_id
+        description: 'The ID of the project.'
+        required: true
+        example: 17
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanUrlParameters:
+      project_id: 17
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses:
+      -
+        custom: []
+        status: 401
+        content: '{"message":"Unauthenticated."}'
+        headers:
+          cache-control: 'no-cache, private'
+          content-type: application/json
+          access-control-allow-origin: '*'
+        description: null
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 'Bearer 3V5EgbkvZcDPa166h8fd4ae'
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - POST
+    uri: 'api/v1/projects/{project_id}/phases'
+    metadata:
+      custom: []
+      groupName: Fases
+      groupDescription: |-
+
+        Endpoints relacionados ao gerenciamento de fases de projetos.
+      subgroup: ''
+      subgroupDescription: ''
+      title: ''
+      description: ''
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer {YOUR_AUTH_TOKEN}'
+      Content-Type: application/json
+      Accept: application/json
+      X-Company-Id: '1'
+    urlParameters:
+      project_id:
+        custom: []
+        name: project_id
+        description: 'The ID of the project.'
+        required: true
+        example: 17
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanUrlParameters:
+      project_id: 17
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters:
+      name:
+        custom: []
+        name: name
+        description: 'Must not be greater than 255 characters.'
+        required: true
+        example: vmqeopfuudtdsufvyvddq
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      description:
+        custom: []
+        name: description
+        description: ''
+        required: false
+        example: 'Dolores dolorum amet iste laborum eius est dolor.'
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: true
+        deprecated: false
+      status:
+        custom: []
+        name: status
+        description: ''
+        required: false
+        example: archived
+        type: string
+        enumValues:
+          - draft
+          - active
+          - archived
+        exampleWasSpecified: false
+        nullable: true
+        deprecated: false
+      sequence:
+        custom: []
+        name: sequence
+        description: 'Must be at least 0.'
+        required: false
+        example: 12
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: true
+        deprecated: false
+      color:
+        custom: []
+        name: color
+        description: 'Must match the regex /^#[0-9A-Fa-f]{6}$/.'
+        required: false
+        example: '#4CD4ab'
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: true
+        deprecated: false
+      planned_start_at:
+        custom: []
+        name: planned_start_at
+        description: 'Must be a valid date.'
+        required: false
+        example: '2026-01-02T13:30:23'
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: true
+        deprecated: false
+      planned_end_at:
+        custom: []
+        name: planned_end_at
+        description: 'Must be a valid date. Must be a date after or equal to <code>planned_start_at</code>.'
+        required: false
+        example: '2107-02-01'
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: true
+        deprecated: false
+    cleanBodyParameters:
+      name: vmqeopfuudtdsufvyvddq
+      description: 'Dolores dolorum amet iste laborum eius est dolor.'
+      status: archived
+      sequence: 12
+      color: '#4CD4ab'
+      planned_start_at: '2026-01-02T13:30:23'
+      planned_end_at: '2107-02-01'
+    fileParameters: []
+    responses: []
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 'Bearer 3V5EgbkvZcDPa166h8fd4ae'
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - PUT
+    uri: 'api/v1/phases/{phase_id}'
+    metadata:
+      custom: []
+      groupName: Fases
+      groupDescription: |-
+
+        Endpoints relacionados ao gerenciamento de fases de projetos.
+      subgroup: ''
+      subgroupDescription: ''
+      title: ''
+      description: ''
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer {YOUR_AUTH_TOKEN}'
+      Content-Type: application/json
+      Accept: application/json
+      X-Company-Id: '1'
+    urlParameters:
+      phase_id:
+        custom: []
+        name: phase_id
+        description: 'The ID of the phase.'
+        required: true
+        example: 17
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanUrlParameters:
+      phase_id: 17
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters:
+      name:
+        custom: []
+        name: name
+        description: 'Must not be greater than 255 characters.'
+        required: false
+        example: vmqeopfuudtdsufvyvddq
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      description:
+        custom: []
+        name: description
+        description: ''
+        required: false
+        example: 'Dolores dolorum amet iste laborum eius est dolor.'
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: true
+        deprecated: false
+      status:
+        custom: []
+        name: status
+        description: ''
+        required: false
+        example: draft
+        type: string
+        enumValues:
+          - draft
+          - active
+          - archived
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      sequence:
+        custom: []
+        name: sequence
+        description: 'Must be at least 0.'
+        required: false
+        example: 12
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+      color:
+        custom: []
+        name: color
+        description: 'Must match the regex /^#[0-9A-Fa-f]{6}$/.'
+        required: false
+        example: '#4CD4ab'
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: true
+        deprecated: false
+      planned_start_at:
+        custom: []
+        name: planned_start_at
+        description: 'Must be a valid date.'
+        required: false
+        example: '2026-01-02T13:30:23'
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: true
+        deprecated: false
+      planned_end_at:
+        custom: []
+        name: planned_end_at
+        description: 'Must be a valid date. Must be a date after or equal to <code>planned_start_at</code>.'
+        required: false
+        example: '2107-02-01'
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: true
+        deprecated: false
+      actual_start_at:
+        custom: []
+        name: actual_start_at
+        description: 'Must be a valid date.'
+        required: false
+        example: '2026-01-02T13:30:23'
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: true
+        deprecated: false
+      actual_end_at:
+        custom: []
+        name: actual_end_at
+        description: 'Must be a valid date.'
+        required: false
+        example: '2026-01-02T13:30:23'
+        type: string
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: true
+        deprecated: false
+    cleanBodyParameters:
+      name: vmqeopfuudtdsufvyvddq
+      description: 'Dolores dolorum amet iste laborum eius est dolor.'
+      status: draft
+      sequence: 12
+      color: '#4CD4ab'
+      planned_start_at: '2026-01-02T13:30:23'
+      planned_end_at: '2107-02-01'
+      actual_start_at: '2026-01-02T13:30:23'
+      actual_end_at: '2026-01-02T13:30:23'
+    fileParameters: []
+    responses: []
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 'Bearer 3V5EgbkvZcDPa166h8fd4ae'
+    controller: null
+    method: null
+    route: null
+  -
+    custom: []
+    httpMethods:
+      - DELETE
+    uri: 'api/v1/phases/{phase_id}'
+    metadata:
+      custom: []
+      groupName: Fases
+      groupDescription: |-
+
+        Endpoints relacionados ao gerenciamento de fases de projetos.
+      subgroup: ''
+      subgroupDescription: ''
+      title: ''
+      description: ''
+      authenticated: true
+      deprecated: false
+    headers:
+      Authorization: 'Bearer {YOUR_AUTH_TOKEN}'
+      Content-Type: application/json
+      Accept: application/json
+      X-Company-Id: '1'
+    urlParameters:
+      phase_id:
+        custom: []
+        name: phase_id
+        description: 'The ID of the phase.'
+        required: true
+        example: 17
+        type: integer
+        enumValues: []
+        exampleWasSpecified: false
+        nullable: false
+        deprecated: false
+    cleanUrlParameters:
+      phase_id: 17
+    queryParameters: []
+    cleanQueryParameters: []
+    bodyParameters: []
+    cleanBodyParameters: []
+    fileParameters: []
+    responses: []
+    responseFields: []
+    auth:
+      - headers
+      - Authorization
+      - 'Bearer 3V5EgbkvZcDPa166h8fd4ae'
+    controller: null
+    method: null
+    route: null
