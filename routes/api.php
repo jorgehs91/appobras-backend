@@ -27,6 +27,7 @@ use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\PurchaseRequestController;
 use App\Http\Controllers\SupplierController;
 use App\Http\Controllers\LicenseController;
+use App\Http\Controllers\ReportsController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('v1')->group(function (): void {
@@ -208,6 +209,10 @@ Route::prefix('v1')->group(function (): void {
             Route::get('/licenses/{license}', [LicenseController::class, 'show']);
             Route::put('/licenses/{license}', [LicenseController::class, 'update']);
             Route::delete('/licenses/{license}', [LicenseController::class, 'destroy']);
+
+            // Reports (exportação CSV)
+            Route::post('/reports/{type}/export', [ReportsController::class, 'export'])->middleware(['company']);
+            Route::get('/reports/download/{filename}', [ReportsController::class, 'download'])->name('api.reports.download')->middleware(['company']);
         });
     });
 });
